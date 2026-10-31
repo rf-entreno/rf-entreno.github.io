@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; manifest-src 'self'; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#060d1f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RODRIGO FIT">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>RODRIGO FIT</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="stylesheet" href="style.css">
+<script src="config.js" defer></script>
+<script src="routine.js" defer></script>
+<script src="media.js" defer></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<header class="top">
+<div class="brand"><span class="logo" aria-hidden="true">R</span><div><h1>RODRIGO FIT</h1><div class="sub">Entrena hoy, un mejor mañana</div></div></div>
+<button type="button" id="go-settings" class="icon-btn" aria-label="Ajustes"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg></button>
+</header>
+<div id="banner"></div>
+<main>
+<noscript><p class="card">Esta aplicación necesita JavaScript activado.</p></noscript>
+<section id="tab-inicio"></section>
+<section id="tab-entrenar" hidden></section>
+<section id="tab-historial" hidden></section>
+<section id="tab-cuerpo" hidden></section>
+<section id="tab-progreso" hidden></section>
+<section id="tab-ajustes" hidden></section>
+</main>
+<nav id="nav" aria-label="Secciones">
+<button type="button" data-tab="inicio"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"/></svg><span>Inicio</span></button>
+<button type="button" data-tab="entrenar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg><span>Entrenar</span></button>
+<button type="button" data-tab="progreso"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Progreso</span></button>
+<button type="button" data-tab="ajustes"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg><span>Ajustes</span></button>
+</nav>
+<div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
