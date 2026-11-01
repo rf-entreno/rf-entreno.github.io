@@ -565,7 +565,7 @@
     out.push(card(field('Fecha del entrenamiento', din),
       h('div', { class: 'days', role: 'group', 'aria-label': 'Rutina del día' }, ...ROUTINE.days.map((d, i) =>
         btn(DAY_SHORT[i], () => { ui.day = i; ui.open = null; render(); }, ui.day === i ? 'active' : 'secondary', { 'aria-pressed': String(ui.day === i), 'data-day': String(i) })))));
-    out.push(recoverBanner());
+    const rb = recoverBanner(); if (rb) out.push(rb);
     if (ui.day === null) { out.push(card(h('p', { id: 'weekend' }, 'Es fin de semana: según tu plan es día de descanso. Si entrenaste, elige arriba la rutina que hiciste.'))); return out; }
     const day = ui.day, s = findSession(date, day), list = h('div', { id: 'exercises' }), exs = s ? s.exercises : blankExercises(day);
     exs.forEach((e, i) => list.append(exerciseItem(date, day, i, e)));

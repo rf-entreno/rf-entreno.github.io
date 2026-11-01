@@ -1,6 +1,6 @@
 'use strict';
 // Service worker de RODRIGO FIT: guarda la aplicación para usarla sin conexión. No guarda datos personales (esos están en localStorage).
-const CACHE = 'rodrigo-fit-1145d039fbdb';
+const CACHE = 'rodrigo-fit-a349007a5b0c';
 const FILES = ["./","./index.html","./style.css","./app.js","./config.js","./routine.js","./manifest.webmanifest","./media/pendiente.svg","./media/pendiente-mini.svg","./media.js","./icons/icon-180.png","./icons/icon-192.png","./icons/icon-512.png"];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
