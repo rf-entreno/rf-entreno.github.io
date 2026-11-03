@@ -21,7 +21,24 @@ self.FIT_CONFIG = Object.freeze({
   "Descansar también es parte de avanzar.",
   "Cada serie cuenta, incluso en los días difíciles.",
   "La constancia gana cuando la motivación descansa.",
-  "No persigas una semana perfecta: construye un año sólido."
+  "No persigas una semana perfecta: construye un año sólido.",
+  "Cada kilo que levantas hoy es fuerza que te acompaña mañana.",
+  "Menos excusas, más repeticiones.",
+  "El músculo se gana con paciencia y se mantiene con constancia.",
+  "Un entrenamiento corto es mejor que ninguno.",
+  "Comer bien y dormir bien también es entrenar.",
+  "La grasa se pierde con hábitos, no con castigos.",
+  "Hoy toca sumar, aunque sea poco.",
+  "Tu mejor marca de hoy es el punto de partida de mañana.",
+  "La técnica primero; el peso llega después.",
+  "Si el día fue duro, entrena suave, pero entrena.",
+  "Pequeñas mejoras semanales hacen grandes cambios en un año.",
+  "El esfuerzo que nadie ve es el que más se nota.",
+  "No necesitas motivación para empezar; la consigues empezando.",
+  "Respira, aprieta y termina la serie.",
+  "Fuerte no es quien nunca falla, sino quien siempre vuelve.",
+  "Tu cuerpo se adapta a lo que repites.",
+  "Cuenta las sesiones, no los días perdidos."
  ],
  "routineNotice": "Rutina basada en el plan previo, pendiente de validación final. Puede cambiar."
 });

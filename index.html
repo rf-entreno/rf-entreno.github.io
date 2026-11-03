@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; manifest-src 'self'; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' blob:; manifest-src 'self'; connect-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#060d1f">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,12 +18,13 @@
 <script src="config.js" defer></script>
 <script src="routine.js" defer></script>
 <script src="media.js" defer></script>
+<script src="library.js" defer></script>
 <script src="app.js" defer></script>
 </head>
 <body>
 <header class="top">
 <div class="brand"><span class="logo" aria-hidden="true">R</span><div><h1>RODRIGO FIT</h1><div class="sub">Entrena hoy, un mejor mañana</div></div></div>
-<button type="button" id="go-settings" class="icon-btn" aria-label="Ajustes"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg></button>
+<div class="top-actions"><button type="button" id="avatar-btn" class="avatar-btn" aria-label="Perfil y ajustes" hidden></button><button type="button" id="go-settings" class="icon-btn" aria-label="Ajustes"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg></button></div>
 </header>
 <div id="banner"></div>
 <main>

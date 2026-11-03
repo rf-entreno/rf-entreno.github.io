@@ -114,3 +114,60 @@ button.back{background:transparent;color:var(--accent-bright);padding:8px 4px;mi
 .ex-nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
 .logo.has-img{background:transparent;padding:0;overflow:hidden}
 .logo img{width:100%;height:100%;object-fit:contain;display:block}
+
+/* ===== V2 · diseño premium (misma identidad: colores de temas.json) ===== */
+.card{box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 10px 28px -18px rgba(0,0,0,.8);background:linear-gradient(180deg,var(--card2) -40%,var(--card) 45%)}
+h2{font-size:23px;letter-spacing:.2px}
+.eyebrow{margin-bottom:2px}
+main>section:not([hidden]){animation:fadein .22s ease-out}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+button{transition:transform .12s ease,filter .12s ease,background-color .2s}
+button:active:not(:disabled){transform:scale(.97);filter:brightness(1.12)}
+button:focus-visible,input:focus-visible,select:focus-visible,.button-like:focus-within{outline:2px solid var(--accent-bright);outline-offset:2px}
+button.big{background:linear-gradient(135deg,var(--accent-bright),var(--accent) 60%);box-shadow:0 8px 22px -12px var(--accent)}
+.stat b{font-size:24px;letter-spacing:-.3px}
+.wday{transition:transform .12s}.wday.done{border-color:var(--ok)}
+.ex{transition:border-color .2s,transform .12s}.ex:active{transform:scale(.99)}
+.motivation .quote{font-size:19px}
+/* Encabezado con foto */
+.top-actions{display:flex;align-items:center;gap:4px}
+.avatar-btn{background:transparent;padding:0;min-width:44px;min-height:44px;display:grid;place-items:center;border-radius:50%}
+.avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;display:block;border:2px solid var(--accent-bright)}
+.avatar.big{width:84px;height:84px;border-width:3px;box-shadow:0 0 0 4px var(--accent-dark)}
+.avatar.placeholder{display:grid;place-items:center;background:linear-gradient(135deg,var(--accent-bright),var(--accent-dark));color:#fff;font-weight:800;font-size:34px}
+.profile .row{flex-wrap:nowrap}.profile .row>.avatar-wrap{flex:none}
+.profile .row+.row{margin-top:12px;flex-wrap:wrap}
+.button-like{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:11px 14px;border-radius:12px;background:var(--accent);color:#fff;font-weight:650;cursor:pointer}
+.profile .hidden-file{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+/* Resumen al completar */
+.celebrate{border-color:var(--ok);background:linear-gradient(135deg,rgba(126,224,161,.16),var(--card) 60%)}
+.grid.three{grid-template-columns:repeat(3,1fr)}
+.kpi{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;font-size:12px;color:var(--muted)}
+.kpi b{display:block;font-size:20px;color:var(--text)}
+ul.prs{margin:6px 0 10px;padding-left:4px;list-style:none;color:var(--warn);font-weight:600}
+/* Zonas por meta */
+.zones{display:flex;flex-direction:column;gap:10px}
+.zone{background:var(--bg);border:1px solid var(--line);border-left:4px solid var(--muted);border-radius:12px;padding:10px 12px}
+.zone.green{border-left-color:var(--ok)}.zone.red{border-left-color:var(--bad)}
+.zone .row.between{flex-wrap:wrap;gap:4px}
+.zdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;background:var(--muted);vertical-align:middle}
+.zdot.green{background:var(--ok)}.zdot.red{background:var(--bad)}
+.bar{height:6px;border-radius:6px;background:var(--card2);margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-bright));border-radius:6px;transition:width .6s ease}
+canvas.chart{height:210px;touch-action:pan-y}
+#last-time{margin:2px 0}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+progress{appearance:none;-webkit-appearance:none;height:10px;border:0;border-radius:10px;background:var(--card2);overflow:hidden}
+progress::-webkit-progress-bar{background:var(--card2);border-radius:10px}
+progress::-webkit-progress-value{background:linear-gradient(90deg,var(--accent),var(--accent-bright));border-radius:10px}
+progress::-moz-progress-bar{background:var(--accent);border-radius:10px}
+/* Silueta 2D de zonas (misma figura que los mapas musculares) */
+.body-map{display:block;width:100%;max-width:340px;margin:6px auto 2px}
+.bz-skin{fill:#232b45;stroke:#0b0f1a;stroke-width:1.2;stroke-linejoin:round}
+.bz-muscle{fill:#2e3858;stroke:#3d4870;stroke-width:.6}
+.bz-zone{stroke:#0b0f1a;stroke-width:.6}.bz-zone.green{fill:var(--ok)}.bz-zone.red{fill:var(--bad)}.bz-zone.gray{fill:#5b6485}
+.bz-label{fill:var(--muted);font-size:11px}
+.body-legend{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;margin:4px 0 8px}
+/* Registro de una versión anterior de la rutina (solo lectura) */
+.legacy-list{list-style:none;padding:0;margin:8px 0}.legacy-list li{border-top:1px solid var(--line);padding:8px 0}.legacy-list li:first-child{border:0}
+.body-legend .zdot.gray{background:#5b6485}
