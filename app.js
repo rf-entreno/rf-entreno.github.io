@@ -4,9 +4,7 @@
 // Todo dato leído del almacenamiento o de una copia importada se valida de forma estricta antes de usarse.
 (() => {
   const CFG = self.FIT_CONFIG, ROUTINE = self.FIT_ROUTINE;
-  // Ilustraciones anatómicas revisadas (clave "día-ejercicio-alternativa"); mientras falten se muestra una imagen neutra "pendiente".
-  const MEDIA = self.FIT_MEDIA || { illustrations: {}, pending: '' };
-  // Técnica, músculos y errores comunes: solo contenido aprobado (vacío hasta su aprobación; nunca se inventa).
+  // Técnica, músculos y errores comunes por posición "día-ejercicio-alternativa": solo contenido aprobado (nunca se inventa).
   const LIBRARY = self.FIT_LIBRARY || {};
   // Esquema 4 = esquema 3 + abdomen, muslo y pantorrilla. Esquema 5 = esquema 4 + unidad de carga por sesión (kg o lb) y preferencias.
   // Los datos y copias de los esquemas 3 y 4 se aceptan: sus cargas se conservan tal cual, marcadas en kg (la unidad en que se registraron).
@@ -399,11 +397,25 @@
     return out;
   }
   const openRecoveries = () => state.missed.filter(m => m.decision === 'recover' && m.status === 'open').sort((a, b) => a.date.localeCompare(b.date));
+  // ---------- Identidad de un ejercicio realizado
+  // Cada posición de la rutina tiene un movimiento (biblioteca). Se agrupa por movimiento, no por nombre: así «Unilateral» de
+  // elevaciones laterales no se mezcla con «Unilateral» de press de hombros. Sesiones de una rutina anterior: por nombre, solo si
+  // ese nombre no es ambiguo en la rutina actual.
+  const movOf = (day, i, alt) => { const l = LIBRARY[day + '-' + i + '-' + alt]; return l && l.movement ? l.movement : null; };
+  const keyAt = (day, i, alt) => { const m = movOf(day, i, alt); return m ? 'm:' + m : 'p:' + ROUTINE.days[day].exercises[i].name + '›' + exName(day, i, alt); };
+  const AMBIG = (() => { const seen = new Map(), amb = new Set(); ROUTINE.days.forEach((d, day) => d.exercises.forEach((e, i) => [0, 1, 2, 3].forEach(a => { const n = exName(day, i, a), k = keyAt(day, i, a); if (seen.has(n) && seen.get(n) !== k) amb.add(n); else seen.set(n, k); }))); return { amb, seen }; })();
+  const keyOf = (s, idx, e) => fitsRoutine(s) ? keyAt(s.day, idx, e.alt) : (!AMBIG.amb.has(e.name) && AMBIG.seen.has(e.name) ? AMBIG.seen.get(e.name) : 'n:' + e.name);
+  // Nombre visible: el nombre registrado y, si ese nombre se repite en la rutina con otro movimiento, el principal al que sustituye
+  function keyLabel(key, name) {
+    if (!AMBIG.amb.has(name)) return name;
+    for (const [day, d] of ROUTINE.days.entries()) for (const [i, e] of d.exercises.entries()) for (const a of [1, 2, 3]) if (exName(day, i, a) === name && keyAt(day, i, a) === key) return name + ' (alternativa de ' + e.name + ')';
+    return name;
+  }
   // Última vez que se hizo un ejercicio, con las cargas expresadas en la unidad pedida (redondeo a 0,1).
-  function lastPerformance(name, before, unit) {
+  function lastPerformance(key, before, unit) {
     const ss = completed().filter(s => s.date < before).sort((a, b) => b.date.localeCompare(a.date));
-    for (const s of ss) for (const e of s.exercises) {
-      if (e.name !== name) continue;
+    for (const s of ss) for (const [idx, e] of s.exercises.entries()) {
+      if (keyOf(s, idx, e) !== key) continue;
       const sets = e.sets.filter(x => x.reps !== null || x.load !== null).map(x => ({ reps: x.reps, load: x.load === null ? null : r1(conv(x.load, s.unit, unit)) }));
       if (sets.length) return { date: s.date, sets, converted: s.unit !== unit, from: s.unit,
         text: 'Última vez (' + fmtShort(s.date) + '): ' + sets.map(x => (x.reps ?? '–') + ' × ' + (x.load === null ? '–' : fmtNum(x.load)) + ' ' + unit).join(' · ') + (s.unit !== unit ? ' (convertido desde ' + s.unit + ')' : '') };
@@ -411,22 +423,23 @@
     return null;
   }
   // Carga máxima por sesión para un ejercicio (series con repeticiones > 0 y carga indicada)
-  function strengthSeries(name) {
+  function strengthSeries(key) {
     const byDate = new Map();
-    for (const s of completed()) for (const e of s.exercises) {
-      if (e.name !== name) continue;
+    for (const s of completed()) for (const [idx, e] of s.exercises.entries()) {
+      if (keyOf(s, idx, e) !== key) continue;
       for (const x of e.sets) if (x.load !== null && x.reps !== null && x.reps > 0) byDate.set(s.date, Math.max(byDate.get(s.date) ?? -1, r1(conv(x.load, s.unit, LU()))));
     }
     return [...byDate.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([d, v]) => ({ d, v }));
   }
   function strengthNames() {
-    const names = new Set();
-    for (const s of completed()) for (const e of s.exercises) if (e.sets.some(x => x.load !== null && x.reps !== null && x.reps > 0)) names.add(e.name);
-    return [...names].sort((a, b) => a.localeCompare(b, 'es'));
+    // Una entrada por ejercicio real; se muestra el nombre del registro más reciente
+    const keys = new Map();
+    for (const s of [...completed()].sort((a, b) => a.date.localeCompare(b.date))) for (const [idx, e] of s.exercises.entries()) if (e.sets.some(x => x.load !== null && x.reps !== null && x.reps > 0)) keys.set(keyOf(s, idx, e), e.name);
+    return [...keys].map(([k, n]) => ({ key: k, label: keyLabel(k, n) })).sort((a, b) => a.label.localeCompare(b.label, 'es'));
   }
   function countPRs() {
     let n = 0;
-    for (const name of strengthNames()) { let best = null; for (const p of strengthSeries(name)) { if (best !== null && p.v > best) n++; best = best === null ? p.v : Math.max(best, p.v); } }
+    for (const { key } of strengthNames()) { let best = null; for (const p of strengthSeries(key)) { if (best !== null && p.v > best) n++; best = best === null ? p.v : Math.max(best, p.v); } }
     return n;
   }
   function weeklyCounts(weeks) {
@@ -469,62 +482,50 @@
   const pick = (list, seed) => list[Math.abs(seed) % list.length];
   const quoteOf = t => { const [y, m, d] = t.split('-').map(Number); return CFG.quotes[Math.floor(Date.UTC(y, m - 1, d) / 864e5) % CFG.quotes.length]; };
 
-  // <silueta-generada> (exportar_silueta.py: misma figura que los mapas musculares; no editar a mano)
-  const BODY = Object.freeze({"trunk":"M54 31C51.8 32.2 54.7 36.3 53 38C51.3 39.7 47 40 44 41C41 42 37.3 42.8 35 44C32.7 45.2 30.3 45.3 30 48C29.7 50.7 32 55.7 33 60C34 64.3 35.2 69 36 74C36.8 79 37.5 85 38 90C38.5 95 39 99.3 39 104C39 108.7 38.3 112 38 118C37.7 124 37 133 37 140C37 147 37.8 154.3 38 160C38.2 165.7 38.2 169 38 174C37.8 179 36.8 184.3 37 190C37.2 195.7 38.5 202.7 39 208C39.5 213.3 40.7 218.2 40 222C39.3 225.8 33.5 229.2 35 231C36.5 232.8 46.5 234.5 49 233C51.5 231.5 49.7 227.5 50 222C50.3 216.5 50.7 207.3 51 200C51.3 192.7 51.3 186.3 52 178C52.7 169.7 54 158.7 55 150C56 141.3 57.2 130.8 58 126C58.8 121.2 59.7 121.8 60 121C60.3 120.2 59.7 120.2 60 121C60.3 121.8 61.2 121.2 62 126C62.8 130.8 64 141.3 65 150C66 158.7 67.3 169.7 68 178C68.7 186.3 68.7 192.7 69 200C69.3 207.3 69.7 216.5 70 222C70.3 227.5 68.5 231.5 71 233C73.5 234.5 83.5 232.8 85 231C86.5 229.2 80.7 225.8 80 222C79.3 218.2 80.5 213.3 81 208C81.5 202.7 82.8 195.7 83 190C83.2 184.3 82.2 179 82 174C81.8 169 81.8 165.7 82 160C82.2 154.3 83 147 83 140C83 133 82.3 124 82 118C81.7 112 81 108.7 81 104C81 99.3 81.5 95 82 90C82.5 85 83.2 79 84 74C84.8 69 86 64.3 87 60C88 55.7 90.3 50.7 90 48C89.7 45.3 87.3 45.2 85 44C82.7 42.8 79 42 76 41C73 40 68.7 39.7 67 38C65.3 36.3 68.2 32.2 66 31C63.8 29.8 56.2 29.8 54 31Z","arms":["M31 46C29.5 45.3 27.2 49 26 52C24.8 55 24.5 60 24 64C23.5 68 23.3 72 23 76C22.7 80 22.5 84.3 22 88C21.5 91.7 20.8 94 20 98C19.2 102 17.5 108 17 112C16.5 116 16.5 118.8 17 122C17.5 125.2 18.7 129.5 20 131C21.3 132.5 24 132.5 25 131C26 129.5 25.2 125.8 26 122C26.8 118.2 28.8 112.3 30 108C31.2 103.7 32.2 100 33 96C33.8 92 34.5 88.3 35 84C35.5 79.7 36 74.7 36 70C36 65.3 35.8 60 35 56C34.2 52 32.5 46.7 31 46Z","M85 56C84.2 60 84 65.3 84 70C84 74.7 84.5 79.7 85 84C85.5 88.3 86.2 92 87 96C87.8 100 88.8 103.7 90 108C91.2 112.3 93.2 118.2 94 122C94.8 125.8 94 129.5 95 131C96 132.5 98.7 132.5 100 131C101.3 129.5 102.5 125.2 103 122C103.5 118.8 103.5 116 103 112C102.5 108 100.8 102 100 98C99.2 94 98.5 91.7 98 88C97.5 84.3 97.3 80 97 76C96.7 72 96.5 68 96 64C95.5 60 95.2 55 94 52C92.8 49 90.5 45.3 89 46C87.5 46.7 85.8 52 85 56Z"],"front":{"trapecio":["M53 38C51.8 37.3 47.3 40 45 41C42.7 42 37.8 43.3 39 44C40.2 44.7 49.7 46 52 45C54.3 44 54.2 38.7 53 38Z","M68 45C70.3 46 79.8 44.7 81 44C82.2 43.3 77.3 42 76 41C72.7 40 68.2 37.3 67 38C65.8 38.7 65.7 44 68 45Z"],"deltoides":["M40 44C38.2 44 34.2 44.5 32 46C29.8 47.5 27.8 50.3 27 53C26.2 55.7 26.5 59.8 27 62C27.5 64.2 28.7 66.7 30 66C31.3 65.3 33.3 60.5 35 58C36.7 55.5 38.7 53 40 51C41.3 49 43 47.2 43 46C43 44.8 41.8 44 40 44Z","M77 46C77 47.2 78.7 49 80 51C81.3 53 83.3 55.5 85 58C86.7 60.5 88.7 65.3 90 66C91.3 66.7 92.5 64.2 93 62C93.5 59.8 93.8 55.7 93 53C92.2 50.3 90.2 47.5 88 46C85.8 44.5 81.8 44 80 44C78.2 44 77 44.8 77 46Z"],"pectoral":["M58.5 47C56.2 43.7 48.4 45 45 46C41.6 47 39.3 50.3 38 53C36.7 55.7 36.5 59.5 37 62C37.5 64.5 38.8 66.8 41 68C43.2 69.2 47.1 69.3 50 69C52.9 68.7 57.1 69.7 58.5 66C59.9 62.3 60.8 50.3 58.5 47Z","M61.5 66C62.9 69.7 67.1 68.7 70 69C72.9 69.3 76.8 69.2 79 68C81.2 66.8 82.5 64.5 83 62C83.5 59.5 83.3 55.7 82 53C80.7 50.3 78.4 47 76 46C71.6 45 63.8 43.7 61.5 47C59.2 50.3 60.1 62.3 61.5 66Z"],"biceps":["M30 67C28.7 67.7 27.7 70.2 27 73C26.3 76 25.8 81 26 84C26.2 87 27 90.2 28 91C29 91.8 31 91 32 89C33 87 33.5 82.3 34 79C34.5 76 35.7 71 35 69C34.3 67 31.3 66.3 30 67Z","M85 69C84.3 71 85.5 76 86 79C86.5 82.3 87 87 88 89C89 91 91 91.8 92 91C93 90.2 93.8 87 94 84C94.2 81 93.7 76 93 73C92.3 70.2 91.3 67.7 90 67C88.7 66.3 85.7 67 85 69Z"],"antebrazo":["M27 94C25.5 95.5 24.2 100.2 23 104C21.8 107.8 20 114 20 117C20 120 21.8 121.3 23 122C24.2 122.7 25.8 123.3 27 121C28.2 118.7 29.2 112.3 30 108C30.8 103.7 32.5 97.3 32 95C31.5 92.7 28.5 92.5 27 94Z","M88 95C87.5 97.3 89.2 103.7 90 108C90.8 112.3 91.8 118.7 93 121C94.2 123.3 95.8 122.7 97 122C98.2 121.3 100 120 100 117C100 114 98.2 107.8 97 104C95.8 100.2 94.5 95.5 93 94C91.5 92.5 88.5 92.7 88 95Z"],"abdomen":["M58.5 71C57.2 64.3 52.6 69.5 51 71C49.4 72.5 49.3 76 49 80C48.7 84.3 48.7 92.5 49 97C49.3 101.5 49.4 104.7 51 107C52.6 109.3 57.2 117 58.5 111C59.8 105 59.8 77.7 58.5 71Z","M61.5 111C62.8 117 67.4 109.3 69 107C70.6 104.7 70.7 101.5 71 97C71.3 92.5 71.3 84.3 71 80C70.7 76 70.6 72.5 69 71C67.4 69.5 62.8 64.3 61.5 71C60.2 77.7 60.2 105 61.5 111Z"],"oblicuos":["M47 71C46 68.5 42.3 69.2 41 71C39.7 72.8 39.2 77.8 39 82C38.8 86.2 39.3 92.5 40 96C40.7 99.5 41.7 101.7 43 103C44.3 104.3 47.3 106.8 48 104C48.7 101.2 47.2 91.5 47 86C46.8 80.5 48 73.5 47 71Z","M73 86C72.8 91.5 71.3 101.2 72 104C72.7 106.8 76 104.3 77 103C78.3 101.7 79.3 99.5 80 96C80.7 92.5 81.2 86.2 81 82C80.8 77.8 80.3 72.8 79 71C77.7 69.2 74 68.5 73 71C72 73.5 73.2 80.5 73 86Z"],"cuadriceps":["M54 120C52.2 116.8 47.3 112.8 45 113C42.7 113.2 41 116.5 40 121C39 125.5 39 133.8 39 140C39 146.2 39.2 153.5 40 158C40.8 162.5 42.2 165.7 44 167C45.8 168.3 49.3 168.7 51 166C52.7 163.3 53.2 156.7 54 151C54.8 145.3 56 137.2 56 132C56 126.8 55.8 123.2 54 120Z","M64 132C64 137.2 65.2 145.3 66 151C66.8 156.7 67.3 163.3 69 166C70.7 168.7 74.2 168.3 76 167C77.8 165.7 79.2 162.5 80 158C80.8 153.5 81 146.2 81 140C81 133.8 81 125.5 80 121C79 116.5 77.3 113.2 76 113C72.7 112.8 67.8 116.8 66 120C64.2 123.2 64 126.8 64 132Z"],"aductores":["M58.5 121C58.2 119.7 57 122.8 56.5 126C56 129.2 55.4 136.5 55.5 140C55.6 143.5 56.5 148 57 147C57.5 146 58.2 138.3 58.5 134C58.8 129.7 58.8 122.3 58.5 121Z","M61.5 134C61.8 138.3 62.5 146 63 147C63.5 148 64.4 143.5 64.5 140C64.6 136.5 64 129.2 63.5 126C63 122.8 61.8 119.7 61.5 121C61.2 122.3 61.2 129.7 61.5 134Z"],"pantorrilla":["M40 177C38.5 179.2 38.8 184.8 39 190C39.2 195.2 40.2 203.2 41 208C41.8 212.8 42.8 217.2 44 219C45.2 220.8 47 221.5 48 219C49 216.5 49.7 209.5 50 204C50.3 198.5 50.3 190.5 50 186C49.7 181.5 49.7 178.5 48 177C46.3 175.5 41.5 174.8 40 177Z","M72 177C70.3 178.5 70.3 181.5 70 186C69.7 190.5 69.7 198.5 70 204C70.3 209.5 71 216.5 72 219C73 221.5 74.8 220.8 76 219C77.2 217.2 78.2 212.8 79 208C79.8 203.2 80.8 195.2 81 190C81.2 184.8 81.5 179.2 80 177C78.5 174.8 73.7 175.5 72 177Z"]},"back":{"trapecio":["M60 34C59 29 56.8 35.5 54 37C51.2 38.5 43.8 40.7 43 43C42.2 45.3 47 48.2 49 51C51 53.8 53.2 57.3 55 60C56.8 62.7 59.2 71.3 60 67C60.8 62.7 61 39 60 34Z","M60 67C60.8 71.3 63.2 62.7 65 60C66.8 57.3 69 53.8 71 51C73 48.2 77.8 45.3 77 43C76.2 40.7 68.8 38.5 66 37C63.2 35.5 61 29 60 34C59 39 59.2 62.7 60 67Z"],"deltoides":["M41 45C39 44.7 34.3 44.7 32 46C29.7 47.3 27.8 50.3 27 53C26.2 55.7 26.5 59.8 27 62C27.5 64.2 28.7 66.7 30 66C31.3 65.3 33.3 60.5 35 58C36.7 55.5 38.5 52.7 40 51C41.5 49.3 43.8 49 44 48C44.2 47 43 45.3 41 45Z","M76 48C76.2 49 78.5 49.3 80 51C81.5 52.7 83.3 55.5 85 58C86.7 60.5 88.7 65.3 90 66C91.3 66.7 92.5 64.2 93 62C93.5 59.8 93.8 55.7 93 53C92.2 50.3 90.3 47.3 88 46C85.7 44.7 81 44.7 79 45C77 45.3 76 47 76 48Z"],"dorsal":["M56 64C54.5 59.5 51.5 56.2 49 55C46.5 53.8 42.8 55.2 41 57C39.2 58.8 38 62.2 38 66C38 69.8 39.5 76 41 80C42.5 84.3 44.7 89.2 47 92C49.3 94.8 53.2 98.7 55 97C56.8 95.3 57.8 87.5 58 82C58.2 76.5 57.5 68.5 56 64Z","M62 82C62.2 87.5 63.2 95.3 65 97C66.8 98.7 70.7 94.8 73 92C76 89.2 77.5 84.3 79 80C80.5 76 82 69.8 82 66C82 62.2 80.8 58.8 79 57C77.2 55.2 73.5 53.8 71 55C68.5 56.2 65.5 59.5 64 64C62.5 68.5 61.8 76.5 62 82Z"],"triceps":["M30 65C28.7 66 27.7 68.7 27 72C26.3 76 25.8 81.7 26 85C26.2 88.3 26.8 91.5 28 92C29.2 92.5 31.8 90.5 33 88C34.2 85.5 34.7 80.7 35 77C35.3 73.3 35.8 68 35 66C34.2 64 31.3 64 30 65Z","M85 66C84.2 68 84.7 73.3 85 77C85.3 80.7 85.8 85.5 87 88C88.2 90.5 90.8 92.5 92 92C93.2 91.5 93.8 88.3 94 85C94.2 81.7 93.7 76 93 72C92.3 68.7 91.3 66 90 65C88.7 64 85.8 64 85 66Z"],"antebrazo":["M27 94C25.5 95.5 24.2 100.2 23 104C21.8 107.8 20 114 20 117C20 120 21.8 121.3 23 122C24.2 122.7 25.8 123.3 27 121C28.2 118.7 29.2 112.3 30 108C30.8 103.7 32.5 97.3 32 95C31.5 92.7 28.5 92.5 27 94Z","M88 95C87.5 97.3 89.2 103.7 90 108C90.8 112.3 91.8 118.7 93 121C94.2 123.3 95.8 122.7 97 122C98.2 121.3 100 120 100 117C100 114 98.2 107.8 97 104C95.8 100.2 94.5 95.5 93 94C91.5 92.5 88.5 92.7 88 95Z"],"lumbar":["M58.5 84C57.9 79.8 55.9 83.3 55 86C54.1 88.7 53.2 96.2 53 100C52.8 103.8 53.1 107.2 54 109C54.9 110.8 57.8 115.2 58.5 111C59.2 106.8 59.1 88.2 58.5 84Z","M61.5 111C62.2 115.2 65.1 110.8 66 109C66.9 107.2 67.2 103.8 67 100C66.8 96.2 65.9 88.7 65 86C64.1 83.3 62.1 79.8 61.5 84C60.9 88.2 60.8 106.8 61.5 111Z"],"gluteos":["M59 113C57.5 109.2 52.8 109.2 50 109C47.2 108.8 43.8 109.7 42 112C40.2 114.3 38.8 119.5 39 123C39.2 126.5 40.8 130.8 43 133C45.2 135.2 49.3 136.2 52 136C54.7 135.8 57.8 135.8 59 132C60.2 128.2 60.5 116.8 59 113Z","M61 132C62.2 135.8 65.3 135.8 68 136C70.7 136.2 74.8 135.2 77 133C79.2 130.8 80.8 126.5 81 123C81.2 119.5 79.8 114.3 78 112C76.2 109.7 72.8 108.8 70 109C67.2 109.2 62.5 109.2 61 113C59.5 116.8 59.8 128.2 61 132Z"],"isquios":["M57 139C55 137 47.8 136 45 137C42.2 138 41 141.3 40 145C39 148.7 38.7 155 39 159C39.3 163 40.2 167 42 169C43.8 171 48 172.5 50 171C52 169.5 52.8 163.7 54 160C55.2 156.3 56.5 152.5 57 149C57.5 145.5 59 141 57 139Z","M63 149C63.5 152.5 64.8 156.3 66 160C67.2 163.7 68 169.5 70 171C72 172.5 76.2 171 78 169C79.8 167 80.7 163 81 159C81.3 155 81 148.7 80 145C79 141.3 77.8 138 76 137C72.2 136 65 137 63 139C61 141 62.5 145.5 63 149Z"],"pantorrilla":["M41 176C39.2 177.7 38.2 183.8 38 188C37.8 192.2 39 197.3 40 201C41 204.7 42.7 209.2 44 210C45.3 210.8 47 209.3 48 206C49 202.7 49.8 194.7 50 190C50.2 185.3 50.5 180.3 49 178C47.5 175.7 42.8 174.3 41 176Z","M71 178C69.5 180.3 69.8 185.3 70 190C70.2 194.7 71 202.7 72 206C73 209.3 74.7 210.8 76 210C77.3 209.2 79 204.7 80 201C81 197.3 82.2 192.2 82 188C81.8 183.8 80.8 177.7 79 176C77.2 174.3 72.5 175.7 71 178Z"]}});
-  // </silueta-generada>
-  // ---------- Zonas por meta (verde / rojo / gris)
-  // Solo compara centímetros medidos con la meta: no afirma nada sobre grasa o músculo.
-  // Verde: la última medida está a ≤ 0,5 cm de la meta o al menos 0,5 cm más cerca que la primera. Rojo: al menos 0,5 cm más lejos.
-  // Gris: sin meta, menos de dos medidas o cambio menor de 0,5 cm.
+  // ---------- Evolución corporal: estado de cada dato respecto a su meta (solo compara cifras; no dice nada de grasa o músculo)
+  // Verde: «Meta alcanzada» (a ≤ 0,5 de la meta) o «Mejora» (0,5 o más cerca que al inicio). Rojo: «Retroceso» (0,5 o más lejos).
+  // Azul: «Estable» (hay datos para comparar y el cambio es menor de 0,5). Gris: «Faltan datos» (hay meta pero menos de dos registros). Sin meta: sin color.
   const ZONE_TOL = 0.5;
-  function zoneOf(k) {
-    const g = state.goals[k], ms = state.measures.filter(m => m[k] !== null).sort((a, b) => a.date.localeCompare(b.date));
-    const first = ms[0] ? ms[0][k] : null, last = ms.length ? ms[ms.length - 1][k] : null;
-    let status = 'gray', why = g === null ? 'Sin meta' : ms.length < 2 ? 'Faltan medidas para comparar' : 'Sin cambio significativo';
-    if (g !== null && last !== null && Math.abs(last - g) <= ZONE_TOL) { status = 'green'; why = 'Meta alcanzada'; }
-    else if (g !== null && ms.length >= 2) {
-      const d0 = Math.abs(first - g), d1 = Math.abs(last - g);
-      if (d0 - d1 >= ZONE_TOL) { status = 'green'; why = 'Más cerca de la meta (' + fmtNum(r1(d0 - d1)) + ' cm)'; }
-      else if (d1 - d0 >= ZONE_TOL) { status = 'red'; why = 'Más lejos de la meta (' + fmtNum(r1(d1 - d0)) + ' cm)'; }
-    }
-    const pct = g !== null && first !== null && last !== null && first !== g ? Math.max(0, Math.min(100, Math.round((first - last) / (first - g) * 100))) : (g !== null && last !== null && Math.abs(last - g) <= ZONE_TOL ? 100 : null);
-    return { k, label: MEASURES[k], goal: g, first, last, status, why, pct };
+  const ST_TXT = { green: 'Mejora', red: 'Retroceso', stable: 'Estable', gray: 'Faltan datos', none: 'Sin meta' };
+  function goalStatus(first, last, goal, n) {
+    if (goal === null || goal === undefined) return { status: 'none', why: 'Sin meta' };
+    // Meta alcanzada: a ≤ 0,5 de la meta o superada en la dirección de la meta (bajar si la meta es menor que el inicio, subir si es mayor)
+    if (last !== null && (Math.abs(last - goal) <= ZONE_TOL || (n >= 2 && ((first > goal && last <= goal) || (first < goal && last >= goal))))) return { status: 'green', why: 'Meta alcanzada' };
+    if (n < 2) return { status: 'gray', why: 'Faltan datos' };
+    const d0 = Math.abs(first - goal), d1 = Math.abs(last - goal);
+    if (d0 - d1 >= ZONE_TOL) return { status: 'green', why: 'Mejora' };
+    if (d1 - d0 >= ZONE_TOL) return { status: 'red', why: 'Retroceso' };
+    return { status: 'stable', why: 'Estable' };
   }
-  const ZONE_TXT = { green: 'Verde', red: 'Rojo', gray: 'Gris' };
-  function zonesCard(id) {
-    const zs = MKEYS.map(zoneOf);
-    return h('div', { class: 'card', id }, h('h3', {}, 'Metas de medidas'),
-      h('div', { class: 'zones' }, ...zs.map(z => h('div', { class: 'zone ' + z.status, 'data-zone': z.k, 'data-status': z.status },
-        h('div', { class: 'row between' }, h('strong', {}, h('span', { class: 'zdot ' + z.status, 'aria-hidden': 'true' }), z.label), h('span', { class: 'tiny muted' }, ZONE_TXT[z.status] + ' · ' + z.why)),
-        h('div', { class: 'tiny muted' }, (z.first !== null ? 'Inicio ' + fmtNum(z.first) + ' cm · Actual ' + fmtNum(z.last) + ' cm' : 'Sin medidas') + (z.goal !== null ? ' · Meta ' + fmtNum(z.goal) + ' cm' : '')),
-        z.pct !== null ? h('div', { class: 'bar', role: 'img', 'aria-label': z.pct + ' % del camino hacia la meta' }, h('i', { style: null, 'data-pct': String(z.pct) })) : null))),
-      h('p', { class: 'tiny muted' }, 'Criterio: verde si la medida se acerca a la meta (0,5 cm o más) o la alcanza; rojo si se aleja 0,5 cm o más; gris si no hay meta, faltan medidas o el cambio es menor. Las medidas no indican por sí solas si el cambio es grasa o músculo.'));
+  const pctTo = (first, last, goal) => goal === null || goal === undefined || first === null || last === null ? null
+    : first === goal ? (Math.abs(last - goal) <= ZONE_TOL ? 100 : 0) : Math.max(0, Math.min(100, Math.round((first - last) / (first - goal) * 100)));
+  // Serie ordenada por fecha: k = 'weight' o una medida
+  const seriesOf = k => k === 'weight' ? sortedWeights().map(x => ({ d: x.date, v: x.value })) : state.measures.filter(m => m[k] !== null).sort((a, b) => a.date.localeCompare(b.date)).map(m => ({ d: m.date, v: m[k] }));
+  function evo(k, from, to) {
+    const s = seriesOf(k).filter(p => (!from || p.d >= from) && (!to || p.d <= to)), goal = k === 'weight' ? state.goals.weight : state.goals[k];
+    const first = s.length ? s[0].v : null, last = s.length ? s[s.length - 1].v : null;
+    return Object.assign({ k, label: k === 'weight' ? 'Peso' : MEASURES[k], unit: k === 'weight' ? 'kg' : 'cm', first, last, firstD: s.length ? s[0].d : null, lastD: s.length ? s[s.length - 1].d : null, n: s.length, goal,
+      diff: first !== null && last !== null ? r1(last - first) : null, pct: s.length > 1 || (last !== null && goal !== null && goal !== undefined && Math.abs(last - goal) <= ZONE_TOL) ? pctTo(first, last, goal) : null }, goalStatus(first, last, goal, s.length));
+  }
+  // Compatibilidad con el resto de la app (Inicio y pruebas): misma forma que antes
+  const zoneOf = k => { const e = evo(k); return { k, label: e.label, goal: e.goal, first: e.first, last: e.last, status: e.status, why: e.why, pct: e.pct }; };
+  const signed = (v, u) => v === null ? '—' : (v > 0 ? '+' : v < 0 ? '−' : '') + fmtNum(Math.abs(v)) + ' ' + u;
+  const chip = e => h('span', { class: 'st ' + e.status, 'data-status': e.status }, e.why);
+  function measuresCard(id) {
+    const rows = MKEYS.map(k => evo(k));
+    return h('div', { class: 'card', id }, h('h3', {}, 'Medidas corporales'),
+      h('div', { class: 'mlist' }, ...rows.map(e => h('button', { type: 'button', class: 'mrow' + (ui.measure === e.k ? ' sel' : ''), 'data-zone': e.k, 'data-status': e.status, onclick: () => { ui.measure = e.k; render(); } },
+        h('div', { class: 'mrow-top' }, h('strong', {}, e.label), chip(e)),
+        h('div', { class: 'mrow-nums' },
+          h('span', {}, h('small', {}, 'Inicio'), e.first === null ? '—' : fmtNum(e.first)),
+          h('span', {}, h('small', {}, 'Actual'), e.last === null ? '—' : fmtNum(e.last)),
+          h('span', { class: 'd ' + e.status }, h('small', {}, 'Cambio'), signed(e.n > 1 ? e.diff : null, 'cm')),
+          h('span', {}, h('small', {}, 'Meta'), e.goal === null ? '—' : fmtNum(e.goal))),
+        e.pct !== null ? h('div', { class: 'bar', role: 'img', 'aria-label': e.pct + ' % del camino hacia la meta' }, h('i', { 'data-pct': String(e.pct) })) : null,
+        e.pct !== null ? h('div', { class: 'tiny muted' }, e.pct + ' % hacia la meta') : null))),
+      h('p', { class: 'tiny muted' }, 'Toca una medida para ver su gráfico. Verde: mejora o meta alcanzada · Rojo: retroceso · Azul: estable (cambio menor de 0,5) · Gris: faltan datos · Sin color: sin meta. Las medidas no indican por sí solas si el cambio es grasa o músculo.'));
   }
   const fillBars = root => root.querySelectorAll('.bar i[data-pct]').forEach(i => { i.style.width = i.dataset.pct + '%'; });
-
-  // ---------- Silueta 2D: colorea la figura (frente y espalda) con el estado de cada zona (mismo criterio que la lista)
-  const ZONE_REGIONS = { chest: { front: ['pectoral'] }, arm: { front: ['biceps'], back: ['triceps'] }, waist: { front: ['oblicuos'] }, abdomen: { front: ['abdomen'] },
-    hip: { back: ['gluteos'] }, thigh: { front: ['cuadriceps', 'aductores'], back: ['isquios'] }, calf: { front: ['pantorrilla'], back: ['pantorrilla'] } };
-  const SVGNS = "http://www.w3.org/2000/svg"; // espacio de nombres SVG (no es una conexión)
-  const sv = (tag, attrs) => { const el = document.createElementNS(SVGNS, tag); for (const [k, v] of Object.entries(attrs || {})) el.setAttribute(k, v); return el; };
-  function bodyCard() {
-    const zs = Object.fromEntries(MKEYS.map(k => [k, zoneOf(k)])), owner = {};
-    for (const [k, views] of Object.entries(ZONE_REGIONS)) for (const [view, regs] of Object.entries(views)) for (const r of regs) owner[view + ':' + r] = k;
-    const svg = sv('svg', { viewBox: '0 0 260 250', class: 'body-map', role: 'img', 'aria-label': 'Silueta con tus zonas: ' + MKEYS.map(k => MEASURES[k] + ' ' + ZONE_TXT[zs[k].status].toLowerCase()).join(', ') });
-    ['front', 'back'].forEach((view, n) => {
-      const g = sv('g', { transform: 'translate(' + (6 + n * 128) + ' 4)' });
-      g.append(sv('ellipse', { cx: '60', cy: '19', rx: '10.5', ry: '12.5', class: 'bz-skin' }), sv('path', { d: BODY.trunk, class: 'bz-skin' }), ...BODY.arms.map(d => sv('path', { d, class: 'bz-skin' })));
-      for (const [r, ds] of Object.entries(BODY[view])) {
-        const k = owner[view + ':' + r], cls = k ? 'bz-zone ' + zs[k].status : 'bz-muscle';
-        for (const d of ds) { const p = sv('path', { d, class: cls }); if (k) p.setAttribute('data-zone', k); g.append(p); }
-      }
-      svg.append(g);
-      const t = sv('text', { x: String(66 + n * 128), y: '246', 'text-anchor': 'middle', class: 'bz-label' }); t.textContent = n ? 'Espalda' : 'Frente'; svg.append(t);
-    });
-    return h('div', { class: 'card', id: 'body-card' }, h('div', { class: 'eyebrow' }, 'Evolución corporal'), h('h3', {}, 'Tu cuerpo según tus metas'), svg,
-      h('div', { class: 'body-legend tiny' }, ...[['green', 'Se acerca o alcanza la meta'], ['red', 'Se aleja'], ['gray', 'Sin meta o sin datos']].map(([s, l]) => h('span', {}, h('span', { class: 'zdot ' + s, 'aria-hidden': 'true' }), l))),
-      h('p', { class: 'tiny muted' }, 'Representación sencilla de tus zonas; no es una imagen real de tu cuerpo.'));
-  }
 
   // ---------- Gráficos (canvas, sin librerías)
   function chartSetup(c) {
@@ -594,30 +595,43 @@
     x.stroke();
   }
 
-  // ---------- Ilustraciones de ejercicios
+  // ---------- Fichas de ejercicios (sin imágenes)
   const mediaKey = (day, i, alt) => day + '-' + i + '-' + alt;
-  function illustration(day, i, alt, size, cls) {
-    const m = MEDIA.illustrations[mediaKey(day, i, alt)], name = exName(day, i, alt);
-    return h('img', { src: m ? m[size] : (size === 'thumb' && MEDIA.pendingThumb) || MEDIA.pending, alt: m ? 'Ilustración: ' + name : 'Ilustración pendiente de revisión: ' + name, class: cls + (m ? '' : ' pending'),
-      'data-media': mediaKey(day, i, alt), loading: size === 'thumb' ? 'lazy' : null, decoding: 'async' });
-  }
-  function infoPane(day, i, alt, kind) {
+  const parsePresc = p => { const m = /^\s*(\d+)\s*[×x]\s*(.+)$/.exec(p || ''); return m ? { series: m[1], reps: m[2] } : { series: '—', reps: p || '—' }; };
+  function musclesLine(day, i, alt) {
     const lib = LIBRARY[mediaKey(day, i, alt)];
-    if (kind === 'tec') {
-      if (lib && lib.technique) return h('div', { class: 'info', id: 'pane-tec' }, h('strong', {}, 'Técnica correcta'), h('ol', {}, ...lib.technique.map(t => h('li', {}, t))),
-        lib.errors ? h('strong', {}, 'Errores comunes') : null, lib.errors ? h('ul', {}, ...lib.errors.map(t => h('li', {}, t))) : null);
-      return h('div', { class: 'info', id: 'pane-tec' }, h('strong', {}, 'Técnica correcta y errores comunes'),
-        h('p', { class: 'muted tiny' }, 'Pendiente de contenido aprobado. No se muestran instrucciones sin revisar.'));
-    }
-    if (lib && lib.muscles) return h('div', { class: 'info', id: 'pane-mus' }, h('strong', {}, 'Músculos principales'), h('ul', {}, ...lib.muscles.map(t => h('li', {}, t))));
-    return h('div', { class: 'info', id: 'pane-mus' }, h('strong', {}, 'Músculos trabajados'),
-      h('p', { class: 'muted tiny' }, 'Pendiente de contenido aprobado. La ilustración revisada resaltará los músculos principales.'));
+    if (!lib || !lib.muscles) return h('p', { class: 'muscles muted', id: 'ex-muscles' }, 'Músculos: pendiente de contenido aprobado.');
+    const get = re => (lib.muscles.find(m => re.test(m)) || '').replace(/^[^:]+:\s*/, '');
+    const pri = get(/^Principales/), sec = get(/^Secundarios/);
+    return h('p', { class: 'muscles', id: 'ex-muscles' }, h('b', {}, pri || lib.muscles.join(', ')), sec ? h('span', { class: 'muted' }, ' · también ' + sec.toLowerCase()) : null);
+  }
+  function techBox(day, i, alt) {
+    const lib = LIBRARY[mediaKey(day, i, alt)], d = h('details', { class: 'tech', id: 'ex-tech' });
+    if (ui.techOpen) d.open = true;
+    d.addEventListener('toggle', () => { ui.techOpen = d.open; });
+    const steps = lib && lib.technique ? lib.technique.filter(t => !/^Equipo:/.test(t)).map(t => t.replace(/^(Inicio|Movimiento|Final):\s*/, '')).filter(t => !/^\(.*\)$/.test(t)) : [];
+    const equipo = lib && lib.technique ? (lib.technique.find(t => /^Equipo:/.test(t)) || '').replace(/^Equipo:\s*/, '') : '';
+    d.append(h('summary', {}, 'Cómo hacerlo'), h('div', { class: 'tech-body' },
+      steps.length ? null : h('p', { class: 'muted tiny' }, 'Pendiente de contenido aprobado. No se muestran instrucciones sin revisar.'),
+      equipo ? h('p', { class: 'tiny muted' }, 'Equipo: ' + equipo) : null,
+      steps.length ? h('ol', {}, ...steps.map(t => h('li', {}, t))) : null,
+      lib && lib.errors && lib.errors.length ? h('div', { class: 'avoid' }, h('strong', {}, 'Evita'), h('ul', {}, ...lib.errors.map(t => h('li', {}, t)))) : null));
+    return d;
+  }
+  // Historial de este ejercicio (por nombre): últimas sesiones con series registradas
+  function exHistory(key, date) {
+    const rows = [...state.sessions].filter(s => s.date !== date).sort((a, b) => b.date.localeCompare(a.date)).flatMap(s => s.exercises.map((e, idx) => ({ s, e, idx })).filter(({ s, e, idx }) => keyOf(s, idx, e) === key))
+      .filter(({ e }) => e.sets.some(x => x.reps !== null || x.load !== null)).slice(0, 5);
+    return h('div', { class: 'card', id: 'ex-history' }, h('h3', {}, 'Historial de este ejercicio'),
+      ...(rows.length ? rows.map(({ s, e }) => h('div', { class: 'item' }, h('strong', {}, fmt(s.date)),
+        h('div', { class: 'tiny muted' }, e.sets.filter(x => x.reps !== null || x.load !== null).map(x => (x.reps ?? '–') + ' × ' + (x.load === null ? '–' : withUnit(x.load, s.unit))).join(' · '))))
+        : [h('p', { class: 'muted tiny' }, 'Todavía no hay registros de este ejercicio.')]));
   }
 
   // ---------- Navegación (4 botones; Historial y Peso y medidas viven dentro de Progreso)
   const TABS = ['inicio', 'entrenar', 'historial', 'cuerpo', 'progreso', 'ajustes'];
   const NAV_OF = { inicio: 'inicio', entrenar: 'entrenar', progreso: 'progreso', cuerpo: 'progreso', historial: 'progreso', ajustes: 'ajustes' };
-  const SUBS = [['progreso', 'Resumen'], ['cuerpo', 'Peso y medidas'], ['historial', 'Historial']];
+  const SUBS = [['progreso', 'Resumen'], ['cuerpo', 'Evolución corporal'], ['historial', 'Historial']];
   const subnav = () => h('div', { class: 'seg', role: 'group', 'aria-label': 'Secciones de progreso' },
     ...SUBS.map(([t, l]) => btn(l, () => go(t), ui.tab === t ? 'on' : '', { 'data-sub': t, 'aria-pressed': String(ui.tab === t) })));
   let after = [];
@@ -734,7 +748,7 @@
         h('span', { class: 'pill', id: 'done-count', 'aria-label': 'Ejercicios hechos' }, exs.filter(e => e.done).length + ' / ' + exs.length)),
       h('div', { class: 'row' }, h('span', { class: 'pill', id: 'session-status' }, statusText(s))),
       h('p', { class: 'tiny warn' }, CFG.routineNotice),
-      h('p', { class: 'muted tiny' }, 'Toca un ejercicio para abrirlo a pantalla completa: ilustración, alternativas y registro de series.'),
+      h('p', { class: 'muted tiny' }, 'Toca un ejercicio para abrirlo: técnica, alternativas y registro de series.'),
       list, sessionActions(date, day, s)));
     return out;
   }
@@ -742,10 +756,10 @@
   // Récords: ejercicios de la sesión cuya mayor carga (con repeticiones) supera la mejor de las sesiones completadas ANTERIORES.
   function sessionPRs(s) {
     const out = [];
-    for (const e of s.exercises) {
+    for (const [idx, e] of s.exercises.entries()) {
       const loads = e.sets.filter(x => x.load !== null && x.reps !== null && x.reps > 0).map(x => r1(conv(x.load, s.unit, LU())));
       if (!loads.length) continue;
-      const prev = strengthSeries(e.name).filter(p => p.d < s.date);
+      const prev = strengthSeries(keyOf(s, idx, e)).filter(p => p.d < s.date);
       if (prev.length && Math.max(...loads) > Math.max(...prev.map(p => p.v))) out.push({ name: e.name, value: Math.max(...loads) });
     }
     return out;
@@ -785,7 +799,6 @@
     const base = ROUTINE.days[day].exercises[i];
     return h('div', { class: 'ex', 'data-ex': String(i) }, h('div', { class: 'ex-head' }, doneBox(e, i, updater(date, day, i)),
       h('button', { type: 'button', class: 'ex-toggle', 'aria-expanded': 'false', onclick: () => { ui.open = i; ui.pane = 'alt'; render(); self.scrollTo(0, 0); } },
-        illustration(day, i, e.alt, 'thumb', 'thumb'),
         h('span', { class: 'ex-info' }, h('strong', { class: 'ex-name' }, (i + 1) + '. ' + e.name), h('span', { class: 'pill' }, base.prescription), altBadge(e)),
         h('span', { class: 'chev', 'aria-hidden': 'true' }, '›'))));
   }
@@ -803,10 +816,13 @@
     { const s0 = findSession(date, day); if (s0 && !fitsRoutine(s0)) { ui.open = null; return tabEntrenar(); } }
     const s = findSession(date, day), exs = s ? s.exercises : blankExercises(day), e = exs[i], n = exs.length, base = ROUTINE.days[day].exercises[i], upd = updater(date, day, i);
     const goEx = j => { ui.open = j; render(); self.scrollTo(0, 0); };
-    const choose = alt => { upd(x => { x.alt = alt; x.name = exName(day, i, alt); }); render(); };
-    const sel = h('select', { 'aria-label': 'Variación del ejercicio ' + (i + 1) }, h('option', { value: '0' }, 'Principal: ' + base.name), ...base.alternatives.map((a, j) => h('option', { value: String(j + 1) }, (j + 1) + '. ' + a)));
-    sel.value = String(e.alt);
-    sel.addEventListener('change', () => choose(Number(sel.value)));
+    // Cada registro guarda el ejercicio realmente hecho (nombre y número de alternativa; la posición lo vincula con el principal).
+    // Si ya hay series anotadas, se pide confirmación: quedarán registradas como el ejercicio elegido (no se mezclan ni se pierden).
+    const choose = alt => {
+      const cur = (findSession(date, day) || { exercises: exs }).exercises[i], n = cur.sets.filter(x => x.reps !== null || x.load !== null).length;
+      if (n && !confirm('Ya anotaste ' + n + (n === 1 ? ' serie' : ' series') + ' en «' + cur.name + '». ¿Registrarlas como «' + exName(day, i, alt) + '»?')) return render();
+      upd(x => { x.alt = alt; x.name = exName(day, i, alt); }); render();
+    };
     // Cada sesión guarda la unidad en que se registró; una sesión nueva usa la unidad elegida en Ajustes.
     const u = s ? s.unit : LU(), lr = loadRange(u);
     const setRow = (x, j) => {
@@ -816,28 +832,26 @@
       load.addEventListener('change', () => { const r = readNum(load, lr); mark(load, r.ok); if (!r.ok) return toast('Carga: número entre 0 y ' + lr[1] + ' ' + u + ', con hasta 2 decimales.', true); upd(y => { y.sets[j].load = r.v; }); });
       return h('div', { class: 'set' }, h('span', { class: 'muted tiny' }, 'Serie ' + (j + 1)), load, reps);
     };
-    const prev = lastPerformance(e.name, date, u);
+    const prev = lastPerformance(keyAt(day, i, e.alt), date, u);
     const emptySets = e.sets.every(x => x.reps === null && x.load === null);
     const repeat = prev && emptySets ? btn('↺ Repetir la última vez (' + prev.sets.length + (prev.sets.length === 1 ? ' serie)' : ' series)'), () => {
       upd(x => { x.sets = prev.sets.slice(0, 10).map(y => ({ reps: y.reps, load: y.load !== null && y.load <= lr[1] ? y.load : null })); }); toast('Series copiadas de la última vez. Ajusta lo que cambie.'); render();
     }, 'small outline', { 'data-action': 'repeat-last' }) : null;
     const tiles = h('div', { class: 'alts', role: 'group', 'aria-label': 'Ejercicio principal y alternativas' }, ...[0, 1, 2, 3].map(a =>
       h('button', { type: 'button', class: 'alt-tile', 'aria-pressed': String(e.alt === a), 'data-alt': String(a), onclick: () => { if (e.alt !== a) choose(a); } },
-        illustration(day, i, a, 'thumb', ''), h('span', {}, (a ? a + '. ' : 'Principal: ') + exName(day, i, a)))));
-    const panes = { alt: h('div', { id: 'pane-alt' }, tiles, field('Variación', sel)), tec: infoPane(day, i, e.alt, 'tec'), mus: infoPane(day, i, e.alt, 'mus') };
-    const pane = panes[ui.pane] ? ui.pane : 'alt';
+        h('small', {}, a ? 'Alternativa ' + a : 'Principal'), h('span', {}, exName(day, i, a)))));
+    const pr = parsePresc(base.prescription);
     const doneDays = exs.filter(x => x.done).length;
     return [h('div', { id: 'ex-detail', class: 'detail', 'data-ex': String(i) },
       h('div', { class: 'detail-top' }, btn('‹ Volver', () => goEx(null), 'back', { id: 'ex-back' }),
         h('span', { class: 'muted tiny' }, DAY(day) + ' · ' + fmtShort(date)), h('span', { class: 'pill', id: 'ex-pos', 'aria-label': 'Ejercicio ' + (i + 1) + ' de ' + n }, (i + 1) + ' / ' + n)),
       recoverBanner(),
       h('h2', { class: 'ex-name' }, (i + 1) + '. ' + e.name),
-      h('div', { class: 'row tags' }, h('span', { class: 'pill' }, base.prescription), altBadge(e)),
-      h('figure', { class: 'hero' }, illustration(day, i, e.alt, 'large', 'large'),
-        h('figcaption', { class: 'tiny muted' }, e.alt ? e.name + ' · alternativa de ' + base.name : e.name)),
-      h('div', { class: 'seg', role: 'group', 'aria-label': 'Información del ejercicio' },
-        ...[['alt', 'Alternativas (3)'], ['tec', 'Técnica'], ['mus', 'Músculos']].map(([k, l]) => btn(l, () => { ui.pane = k; render(); }, pane === k ? 'on' : '', { 'data-pane': k, 'aria-pressed': String(pane === k) }))),
-      panes[pane],
+      h('div', { class: 'row tags' }, altBadge(e), e.alt ? h('span', { class: 'tiny muted' }, 'sustituye a «' + base.name + '»') : null),
+      musclesLine(day, i, e.alt),
+      h('div', { class: 'sr', id: 'ex-sr' }, h('div', {}, h('b', {}, pr.series), h('span', {}, 'series')), h('div', {}, h('b', {}, pr.reps), h('span', {}, 'repeticiones'))),
+      techBox(day, i, e.alt),
+      h('h3', { class: 'alts-title' }, 'Alternativas'), tiles,
       h('h3', { class: 'sets-title' }, 'Series y repeticiones'),
       prev ? h('p', { class: 'tiny muted', id: 'last-time' }, prev.text) : null, repeat,
       h('div', { class: 'sets' }, h('div', { class: 'set set-head', 'aria-hidden': 'true' }, h('span', {}, 'Serie'), h('span', {}, 'Peso (' + u + ')'), h('span', {}, 'Repeticiones')), ...e.sets.map(setRow)),
@@ -854,6 +868,7 @@
       h('div', { class: 'ex-nav' },
         btn('‹ Anterior', () => goEx(i - 1), 'secondary', { disabled: i === 0, 'data-action': 'prev-ex' }),
         btn(i < n - 1 ? 'Siguiente ›' : 'Volver a la lista', () => goEx(i < n - 1 ? i + 1 : null), '', { 'data-action': 'next-ex' }))),
+      exHistory(keyAt(day, i, e.alt), date),
       card(h('div', { class: 'row' }, h('span', { class: 'pill', id: 'session-status' }, statusText(s)), h('span', { class: 'pill', id: 'done-count', 'aria-label': 'Ejercicios hechos' }, doneDays + ' / ' + n)),
         sessionActions(date, day, s))];
   }
@@ -915,11 +930,44 @@
   }
 
   // ---------- Cuerpo: peso y medidas
+  // Historial: los 4 registros más recientes a la vista; el resto, desplegable (no se borra nada)
+  const recent = items => items.length <= 4 ? items : [...items.slice(0, 4), h('details', { class: 'more' }, h('summary', {}, 'Ver los ' + (items.length - 4) + ' registros anteriores'), ...items.slice(4))];
   function tabCuerpo() {
-    const out = [subnav(), h('h2', {}, 'Peso y medidas')];
-    // Silueta 2D con las zonas por meta (sustituye al espacio reservado para el avatar 3D, aparcado).
-    out.push(bodyCard());
-    out.push(zonesCard('zones-body')); after.push(() => fillBars($('#zones-body')));
+    const out = [subnav(), h('h2', {}, 'Evolución corporal')];
+    // 1. Peso: actual, inicial, objetivo, diferencia, progreso y gráfico
+    const W = evo('weight'), kpi = (l, v, u, big) => h('div', { class: 'kpi' + (big ? ' big' : '') }, h('span', {}, l), h('b', {}, v === null ? '—' : fmtNum(v)), v === null ? null : h('small', {}, u));
+    const cw = h('canvas', { class: 'chart', id: 'chart-weight', role: 'img', 'aria-label': 'Gráfico de peso corporal' });
+    after.push(() => drawLine(cw, seriesOf('weight'), state.goals.weight, 'kg'));
+    out.push(h('div', { class: 'card', id: 'weight-evo', 'data-status': W.status }, h('div', { class: 'row between' }, h('h3', {}, 'Peso corporal'), chip(W)),
+      h('div', { class: 'kpis' }, kpi('Actual', W.last, 'kg', true), kpi('Inicial', W.first, 'kg'), kpi('Objetivo', W.goal, 'kg')),
+      h('div', { class: 'row between evo-line' }, h('span', { class: 'd ' + W.status, id: 'weight-diff' }, W.n > 1 ? signed(W.diff, 'kg') + ' desde el inicio' : 'Registra al menos dos pesos para comparar'),
+        W.pct !== null ? h('span', { class: 'tiny muted' }, W.pct + ' % hacia tu meta') : null),
+      W.pct !== null ? h('div', { class: 'bar' }, h('i', { 'data-pct': String(W.pct) })) : null, cw));
+    // 2. Medidas: inicio, actual, cambio, meta, progreso y estado
+    out.push(measuresCard('zones-body')); after.push(() => { fillBars($('#zones-body')); fillBars($('#weight-evo')); });
+    // 3. Gráfico por fecha de la medida elegida
+    if (!MEASURES[ui.measure]) ui.measure = MKEYS[0];
+    const E = evo(ui.measure), cm = h('canvas', { class: 'chart', id: 'chart-measure', role: 'img', 'aria-label': 'Gráfico de ' + MEASURES[ui.measure] });
+    const msel = h('select', { id: 'measure-select', 'aria-label': 'Medida del gráfico' }, ...Object.entries(MEASURES).map(([k, l]) => h('option', { value: k }, l)));
+    msel.value = ui.measure; msel.addEventListener('change', () => { ui.measure = msel.value; render(); });
+    after.push(() => drawLine(cm, seriesOf(ui.measure), state.goals[ui.measure], 'cm'));
+    out.push(card(h('div', { class: 'row between' }, h('h3', {}, 'Evolución por fecha'), chip(E)), msel, cm, dataTable(seriesOf(ui.measure).map(p => [fmt(p.d), fmtNum(p.v) + ' cm']))));
+    // 4. Comparación entre períodos
+    const PER = [['30', '30 días'], ['90', '90 días'], ['365', '1 año'], ['all', 'Todo'], ['custom', 'Fechas']];
+    if (!ui.period) ui.period = '90';
+    const back = n => { const d = parseISO(today()); d.setDate(d.getDate() - n); return isoOf(d); };
+    let pFrom = null, pTo = today();
+    if (ui.period === 'custom') { pFrom = ui.pFrom || back(30); pTo = ui.pTo || today(); } else if (ui.period !== 'all') pFrom = back(Number(ui.period));
+    const fIn = dateInput('period-from', pFrom || today()), tIn = dateInput('period-to', pTo);
+    fIn.addEventListener('change', () => { if (dateOk(fIn.value)) { ui.pFrom = fIn.value; render(); } }); tIn.addEventListener('change', () => { if (dateOk(tIn.value)) { ui.pTo = tIn.value; render(); } });
+    const rowsP = ['weight', ...MKEYS].map(k => evo(k, pFrom, pTo));
+    out.push(h('div', { class: 'card', id: 'period-card' }, h('h3', {}, 'Comparar períodos'),
+      h('div', { class: 'seg', role: 'group', 'aria-label': 'Período' }, ...PER.map(([k, l]) => btn(l, () => { ui.period = k; render(); }, ui.period === k ? 'on' : '', { 'data-period': k, 'aria-pressed': String(ui.period === k) }))),
+      ui.period === 'custom' ? h('div', { class: 'row' }, field('Desde', fIn), field('Hasta', tIn)) : h('p', { class: 'tiny muted' }, pFrom ? 'Del ' + fmt(pFrom) + ' al ' + fmt(pTo) : 'Desde el primer registro'),
+      h('table', { class: 'ptable' }, h('tr', {}, h('th', {}, ''), h('th', {}, 'Al inicio'), h('th', {}, 'Al final'), h('th', {}, 'Cambio')),
+        ...rowsP.map(e => h('tr', { 'data-k': e.k, 'data-status': e.status }, h('td', {}, h('span', { class: 'zdot ' + e.status, 'aria-hidden': 'true' }), e.label),
+          h('td', {}, e.first === null ? '—' : fmtNum(e.first)), h('td', {}, e.n > 1 ? fmtNum(e.last) : '—'), h('td', { class: 'd ' + e.status }, e.n > 1 ? signed(e.diff, e.unit) : 'sin datos')))),
+      h('p', { class: 'tiny muted' }, 'Compara el primer y el último registro dentro del período. El color indica si te acercas o te alejas de tu meta.')));
     const ew = ui.editWeight && state.bodyweights.find(x => x.id === ui.editWeight);
     const val = h('input', { type: 'text', inputmode: 'decimal', id: 'weight-value', placeholder: 'Ej. 80,5', value: ew ? String(ew.value) : '', autocomplete: 'off' });
     const wd = dateInput('weight-date', ew ? ew.date : today());
@@ -939,10 +987,10 @@
       h('div', { class: 'row' },
         btn('Editar', () => { ui.editWeight = x.id; render(); }, 'small secondary', { 'data-action': 'edit-weight' }),
         btn('Eliminar', () => { if (confirm('¿Eliminar el peso del ' + fmt(x.date) + '?')) { state.bodyweights = state.bodyweights.filter(y => y !== x); if (ui.editWeight === x.id) ui.editWeight = null; save(); toast('Peso eliminado'); render(); } }, 'small danger', { 'data-action': 'delete-weight' }))));
-    out.push(card(h('h3', {}, ew ? 'Editar peso' : 'Peso corporal'),
+    out.push(card(h('h3', {}, ew ? 'Editar peso' : 'Registrar peso'),
       h('div', { class: 'row' }, field('Peso (kg)', val), field('Fecha', wd)),
       h('div', { class: 'row' }, btn(ew ? 'Guardar cambios' : 'Guardar peso', saveW, '', { id: 'save-weight' }), ew ? btn('Cancelar', () => { ui.editWeight = null; render(); }, 'secondary') : null),
-      h('div', { id: 'weight-list' }, ...(wl.length ? wl : [h('p', { class: 'muted' }, 'Registra tu primer peso.')]))));
+      h('h4', {}, 'Historial de peso'), h('div', { id: 'weight-list' }, ...(wl.length ? recent(wl) : [h('p', { class: 'muted' }, 'Registra tu primer peso.')]))));
 
     const em = ui.editMeasure && state.measures.find(x => x.id === ui.editMeasure);
     const md = dateInput('measure-date', em ? em.date : today());
@@ -955,9 +1003,16 @@
       const d = md.value; mark(md, dateOk(d));
       if (!dateOk(d)) return toast('Elige una fecha válida que no sea futura.', true);
       const clash = state.measures.find(x => x.date === d && x !== em);
-      if (clash && !confirm('Ya hay medidas registradas el ' + fmt(d) + '. ¿Reemplazarlas?')) return;
-      state.measures = state.measures.filter(x => x !== clash && x !== em);
-      state.measures.push(Object.assign({ id: em ? em.id : newId(), date: d }, vals));
+      if (clash) {
+        // Combina: solo se actualizan los campos rellenados; los vacíos conservan el valor ya guardado ese día (nunca se ponen a cero).
+        const cambia = Object.keys(vals).filter(k => vals[k] !== null && clash[k] !== null && clash[k] !== vals[k]);
+        if (cambia.length && !confirm('El ' + fmt(d) + ' ya tiene medidas. Se actualizarán: ' + cambia.map(k => MEASURES[k] + ' ' + fmtNum(clash[k]) + ' → ' + fmtNum(vals[k])).join(', ') + '. Las demás se conservan. ¿Continuar?')) return;
+        for (const k of Object.keys(vals)) if (vals[k] !== null) clash[k] = vals[k];
+        if (em) state.measures = state.measures.filter(x => x !== em);
+      } else {
+        state.measures = state.measures.filter(x => x !== em);
+        state.measures.push(Object.assign({ id: em ? em.id : newId(), date: d }, vals));
+      }
       ui.editMeasure = null; save(); toast('Medidas guardadas'); render();
     };
     const ml = [...state.measures].sort((a, b) => b.date.localeCompare(a.date)).map(x => h('div', { class: 'item', 'data-measure': x.date },
@@ -965,38 +1020,25 @@
       h('div', { class: 'row' },
         btn('Editar', () => { ui.editMeasure = x.id; render(); }, 'small secondary', { 'data-action': 'edit-measure' }),
         btn('Eliminar', () => { if (confirm('¿Eliminar las medidas del ' + fmt(x.date) + '?')) { state.measures = state.measures.filter(y => y !== x); if (ui.editMeasure === x.id) ui.editMeasure = null; save(); toast('Medidas eliminadas'); render(); } }, 'small danger', { 'data-action': 'delete-measure' }))));
-    out.push(card(h('h3', {}, em ? 'Editar medidas' : 'Medidas corporales'), field('Fecha', md),
+    out.push(card(h('h3', {}, em ? 'Editar medidas' : 'Registrar medidas'), field('Fecha', md),
       h('div', { class: 'grid' }, ...Object.entries(MEASURES).map(([k, l]) => field(l + ' (cm)', inputs[k]))),
       h('div', { class: 'row' }, btn(em ? 'Guardar cambios' : 'Guardar medidas', saveM, '', { id: 'save-measure' }), em ? btn('Cancelar', () => { ui.editMeasure = null; render(); }, 'secondary') : null),
-      h('div', { id: 'measure-list' }, ...(ml.length ? ml : [h('p', { class: 'muted' }, 'Sin medidas registradas.')]))));
+      h('h4', {}, 'Historial de mediciones'), h('div', { id: 'measure-list' }, ...(ml.length ? recent(ml) : [h('p', { class: 'muted' }, 'Sin medidas registradas.')]))));
     return out;
   }
 
   // ---------- Progreso
   function tabProgreso() {
     const out = [subnav(), h('h2', {}, 'Progreso')];
-    const w = sortedWeights(), g = state.goals.weight;
-    const cw = h('canvas', { class: 'chart', id: 'chart-weight', role: 'img', 'aria-label': 'Gráfico de peso corporal' });
-    after.push(() => drawLine(cw, w.map(x => ({ d: x.date, v: x.value })), g, 'kg'));
-    let summary = 'Registra tu peso para ver tu evolución.';
-    if (w.length) {
-      const first = w[0].value, last = w[w.length - 1].value, diff = Math.round((last - first) * 10) / 10;
-      summary = 'Inicio ' + kg(first) + ' · Actual ' + kg(last) + ' · Cambio ' + (diff > 0 ? '+' : '') + fmtNum(diff) + ' kg';
-      if (g !== null) { const rest = Math.round(Math.abs(last - g) * 10) / 10; summary += rest === 0 || (first >= g ? last <= g : last >= g) ? ' · Meta alcanzada' : ' · Faltan ' + kg(rest) + ' para tu meta'; }
-    }
-    out.push(card(h('h3', {}, 'Peso corporal'), cw, h('p', { class: 'tiny muted', id: 'weight-summary' }, summary), dataTable(w.map(x => [fmt(x.date), kg(x.value)]))));
-
-    const msel = h('select', { id: 'measure-select' }, ...Object.entries(MEASURES).map(([k, l]) => h('option', { value: k }, l)));
-    msel.value = ui.measure; msel.addEventListener('change', () => { ui.measure = msel.value; render(); });
-    const mp = state.measures.filter(m => m[ui.measure] !== null).sort((a, b) => a.date.localeCompare(b.date)).map(m => ({ d: m.date, v: m[ui.measure] }));
-    const cm = h('canvas', { class: 'chart', id: 'chart-measure', role: 'img', 'aria-label': 'Gráfico de ' + MEASURES[ui.measure] });
-    after.push(() => drawLine(cm, mp, state.goals[ui.measure], 'cm'));
-    out.push(card(h('h3', {}, 'Medidas'), field('Medida', msel), cm, dataTable(mp.map(p => [fmt(p.d), fmtNum(p.v) + ' cm']))));
-    out.push(zonesCard('zones-progress')); after.push(() => fillBars($('#zones-progress')));
+    const W = evo('weight'), ms = MKEYS.map(k => evo(k)), cnt = st => ms.filter(e => e.status === st).length;
+    out.push(h('div', { class: 'card', id: 'evo-summary' }, h('div', { class: 'row between' }, h('h3', {}, 'Evolución corporal'), chip(W)),
+      h('p', {}, W.last === null ? 'Registra tu peso para empezar.' : 'Peso ' + kg(W.last) + (W.n > 1 ? ' · ' + signed(W.diff, 'kg') + ' desde el inicio' : '') + (W.pct !== null ? ' · ' + W.pct + ' % hacia tu meta' : '')),
+      h('p', { class: 'tiny muted' }, 'Medidas: ' + cnt('green') + ' mejoran · ' + cnt('red') + ' retroceden · ' + cnt('stable') + ' estables · ' + cnt('gray') + ' con datos insuficientes'),
+      btn('Ver evolución corporal', () => go('cuerpo'), 'secondary', { id: 'go-evo' })));
 
     const names = strengthNames();
-    if (!names.includes(ui.strengthEx)) ui.strengthEx = names[0] || null;
-    const ssel = h('select', { id: 'strength-select' }, ...names.map(n => h('option', { value: n }, n)));
+    if (!names.some(n => n.key === ui.strengthEx)) ui.strengthEx = names[0] ? names[0].key : null;
+    const ssel = h('select', { id: 'strength-select' }, ...names.map(n => h('option', { value: n.key }, n.label)));
     if (ui.strengthEx) ssel.value = ui.strengthEx;
     ssel.addEventListener('change', () => { ui.strengthEx = ssel.value; render(); });
     const sp = ui.strengthEx ? strengthSeries(ui.strengthEx) : [];

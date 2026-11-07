@@ -1,6 +1,7 @@
 // Técnica y músculos de RODRIGO FIT (100 de 100 posiciones).
 self.FIT_LIBRARY = Object.freeze({
  "0-0-0": {
+  "movement": "sentadilla-goblet-banco",
   "technique": [
    "Equipo: Mancuerna, banco plano.",
    "Inicio: De pie delante del banco, pies al ancho de hombros, mancuerna vertical sujeta junto al pecho.",
@@ -19,6 +20,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-0-1": {
+  "movement": "sentadilla-smith-banco",
   "technique": [
    "Equipo: Máquina Smith, banco plano.",
    "Inicio: De pie bajo la barra apoyada en la parte alta de la espalda, pies ligeramente adelantados, banco detrás.",
@@ -37,6 +39,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-0-2": {
+  "movement": "step-up-bajo",
   "technique": [
    "Equipo: Banco o escalón bajo (peso corporal).",
    "Inicio: De pie frente al banco bajo, un pie entero sobre él.",
@@ -54,6 +57,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-0-3": {
+  "movement": "sentadilla-sumo-mancuerna",
   "technique": [
    "Equipo: Mancuerna.",
    "Inicio: De pie con pies más anchos que los hombros y puntas hacia fuera; mancuerna colgando entre las piernas.",
@@ -71,6 +75,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-1-0": {
+  "movement": "hip-thrust-smith",
   "technique": [
    "Equipo: Máquina Smith con almohadilla, banco.",
    "Inicio: Espalda alta apoyada en el banco, barra almohadillada sobre la cadera, pies apoyados.",
@@ -88,6 +93,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-1-1": {
+  "movement": "puente-mancuerna",
   "technique": [
    "Equipo: Mancuerna, esterilla.",
    "Inicio: Tumbado boca arriba en el suelo, rodillas flexionadas, mancuerna sobre la cadera.",
@@ -104,6 +110,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-1-2": {
+  "movement": "hip-thrust-mancuerna",
   "technique": [
    "Equipo: Mancuerna, banco.",
    "Inicio: Espalda alta en el banco, mancuerna sujeta sobre la cadera.",
@@ -120,6 +127,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-1-3": {
+  "movement": "puente-unilateral",
   "technique": [
    "Equipo: Esterilla.",
    "Inicio: Boca arriba, una rodilla flexionada con el pie apoyado y la otra pierna elevada.",
@@ -136,6 +144,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-2-0": {
+  "movement": "zancada-inversa-asistida",
   "technique": [
    "Equipo: Apoyo para una mano (banco alto, pared o Smith).",
    "Inicio: De pie junto al apoyo, una mano en él.",
@@ -153,6 +162,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-2-1": {
+  "movement": "split-squat-apoyo",
   "technique": [
    "Equipo: Apoyo para una mano.",
    "Inicio: Posición de zancada fija (pie delantero y trasero separados), una mano en el apoyo.",
@@ -170,6 +180,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-2-2": {
+  "movement": "step-up-bajo",
   "technique": [
    "Equipo: Banco o escalón bajo (peso corporal).",
    "Inicio: De pie frente al banco bajo, un pie entero sobre él.",
@@ -187,6 +198,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-2-3": {
+  "movement": "split-squat-smith",
   "technique": [
    "Equipo: Máquina Smith.",
    "Inicio: Posición de zancada fija bajo la barra apoyada en la parte alta de la espalda.",
@@ -204,6 +216,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-3-0": {
+  "movement": "extension-rodilla-banda",
   "technique": [
    "Equipo: Banda elástica, banco o silla.",
    "Inicio: Sentado, banda anclada detrás y sujeta al tobillo, rodilla flexionada.",
@@ -219,6 +232,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-3-1": {
+  "movement": "sentadilla-isometrica-pared",
   "technique": [
    "Equipo: Pared.",
    "Inicio: Espalda apoyada en la pared, rodillas a unos 90°, pies adelantados.",
@@ -235,6 +249,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-3-2": {
+  "movement": "step-up-bajo",
   "technique": [
    "Equipo: Banco o escalón bajo (peso corporal).",
    "Inicio: De pie frente al banco bajo, un pie entero sobre él.",
@@ -252,6 +267,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-3-3": {
+  "movement": "sentadilla-parcial",
   "technique": [
    "Equipo: Peso corporal.",
    "Inicio: De pie, pies al ancho de hombros, brazos al frente.",
@@ -268,6 +284,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-4-0": {
+  "movement": "talones-smith",
   "technique": [
    "Equipo: Máquina Smith, escalón o disco.",
    "Inicio: De pie bajo la barra, antepié sobre el escalón, talones abajo.",
@@ -284,6 +301,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-4-1": {
+  "movement": "talones-mancuernas",
   "technique": [
    "Equipo: 2 mancuernas, escalón.",
    "Inicio: De pie con mancuernas a los lados, antepié sobre el escalón.",
@@ -300,6 +318,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-4-2": {
+  "movement": "talones-unilateral",
   "technique": [
    "Equipo: Escalón, apoyo para la mano (mancuerna opcional).",
    "Inicio: Sobre una pierna, antepié en el escalón, mano en un apoyo.",
@@ -316,6 +335,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "0-4-3": {
+  "movement": "talones-sentado-mancuerna",
   "technique": [
    "Equipo: Banco, mancuerna, escalón opcional.",
    "Inicio: Sentado, pies apoyados, mancuerna sobre los muslos cerca de las rodillas.",
@@ -332,6 +352,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-0-0": {
+  "movement": "press-pecho-smith",
   "technique": [
    "Equipo: Máquina Smith, banco plano.",
    "Inicio: Tumbado en el banco, barra sobre la parte media del pecho con los codos flexionados.",
@@ -349,6 +370,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-0-1": {
+  "movement": "press-pecho-mancuernas",
   "technique": [
    "Equipo: 2 mancuernas, banco plano.",
    "Inicio: Tumbado, mancuernas a la altura del pecho, codos a unos 45–60°.",
@@ -365,6 +387,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-0-2": {
+  "movement": "flexiones-inclinadas",
   "technique": [
    "Equipo: Banco o barra Smith alta.",
    "Inicio: Manos sobre el banco, cuerpo en línea recta.",
@@ -381,6 +404,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-0-3": {
+  "movement": "press-suelo-mancuernas",
   "technique": [
    "Equipo: 2 mancuernas, esterilla.",
    "Inicio: Tumbado en el suelo, rodillas flexionadas, codos apoyados en el suelo.",
@@ -397,6 +421,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-1-0": {
+  "movement": "press-inclinado-mancuernas",
   "technique": [
    "Equipo: 2 mancuernas, banco inclinado ~30°.",
    "Inicio: Recostado en el banco inclinado, mancuernas a la altura del pecho alto.",
@@ -414,6 +439,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-1-1": {
+  "movement": "press-inclinado-smith",
   "technique": [
    "Equipo: Máquina Smith, banco inclinado ~30°.",
    "Inicio: Recostado en el banco inclinado, barra a la altura del pecho alto.",
@@ -430,6 +456,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-1-2": {
+  "movement": "flexiones-pies-elevados",
   "technique": [
    "Equipo: Banco bajo.",
    "Inicio: Manos en el suelo, pies sobre el banco, cuerpo en línea.",
@@ -446,6 +473,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-1-3": {
+  "movement": "press-inclinado-neutro",
   "technique": [
    "Equipo: 2 mancuernas, banco inclinado.",
    "Inicio: Recostado, mancuernas con las palmas enfrentadas a la altura del pecho.",
@@ -462,6 +490,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-2-0": {
+  "movement": "press-hombros-sentado",
   "technique": [
    "Equipo: 2 mancuernas, banco con respaldo.",
    "Inicio: Sentado con respaldo, mancuernas a la altura de los hombros, palmas al frente.",
@@ -479,6 +508,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-2-1": {
+  "movement": "press-hombros-unilateral",
   "technique": [
    "Equipo: 1 mancuerna, banco con respaldo.",
    "Inicio: Sentado, una mancuerna a la altura del hombro.",
@@ -495,6 +525,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-2-2": {
+  "movement": "press-hombros-neutro",
   "technique": [
    "Equipo: 2 mancuernas, banco con respaldo.",
    "Inicio: Sentado, mancuernas a la altura de los hombros con las palmas enfrentadas.",
@@ -511,6 +542,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-2-3": {
+  "movement": "elevacion-frontal",
   "technique": [
    "Equipo: 1–2 mancuernas ligeras.",
    "Inicio: De pie, mancuernas delante de los muslos.",
@@ -527,6 +559,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-3-0": {
+  "movement": "elevacion-lateral",
   "technique": [
    "Equipo: 2 mancuernas ligeras.",
    "Inicio: De pie, mancuernas a los lados, codos ligeramente flexionados.",
@@ -544,6 +577,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-3-1": {
+  "movement": "elevacion-lateral-unilateral",
   "technique": [
    "Equipo: 1 mancuerna, apoyo para la otra mano.",
    "Inicio: De pie de lado a un apoyo, una mancuerna en el brazo libre.",
@@ -560,6 +594,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-3-2": {
+  "movement": "elevacion-lateral-sentado",
   "technique": [
    "Equipo: 2 mancuernas ligeras, banco.",
    "Inicio: Sentado en el banco, mancuernas a los lados.",
@@ -576,6 +611,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-3-3": {
+  "movement": "elevacion-lateral-banda",
   "technique": [
    "Equipo: Banda elástica pisada.",
    "Inicio: De pie pisando la banda, extremos en las manos a los lados.",
@@ -592,6 +628,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-4-0": {
+  "movement": "extension-triceps-mancuerna",
   "technique": [
    "Equipo: 1 mancuerna sujeta con las dos manos, banco con respaldo.",
    "Inicio: Sentado, mancuerna detrás de la cabeza, codos flexionados apuntando arriba.",
@@ -608,6 +645,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-4-1": {
+  "movement": "press-cerrado-mancuernas",
   "technique": [
    "Equipo: 2 mancuernas, banco plano.",
    "Inicio: Tumbado, mancuernas juntas sobre el pecho con las palmas enfrentadas.",
@@ -624,6 +662,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-4-2": {
+  "movement": "extension-triceps-banda",
   "technique": [
    "Equipo: Banda anclada alta.",
    "Inicio: De pie frente al anclaje, codos pegados al cuerpo y flexionados.",
@@ -639,6 +678,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "1-4-3": {
+  "movement": "patada-triceps",
   "technique": [
    "Equipo: 1 mancuerna, banco.",
    "Inicio: Inclinado con apoyo en el banco, brazo pegado al cuerpo y codo a 90°.",
@@ -655,6 +695,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-0-0": {
+  "movement": "remo-unilateral-apoyado",
   "technique": [
    "Equipo: 1 mancuerna, banco plano.",
    "Inicio: Mano y rodilla del mismo lado en el banco, espalda neutra, brazo colgando.",
@@ -672,6 +713,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-0-1": {
+  "movement": "remo-pecho-apoyado",
   "technique": [
    "Equipo: 2 mancuernas, banco inclinado.",
    "Inicio: Pecho apoyado en el banco inclinado, mancuernas colgando.",
@@ -688,6 +730,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-0-2": {
+  "movement": "remo-banda-sentado",
   "technique": [
    "Equipo: Banda anclada baja o rodeando los pies.",
    "Inicio: Sentado con piernas extendidas, banda tensa con los brazos al frente.",
@@ -704,6 +747,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-0-3": {
+  "movement": "remo-invertido-smith",
   "technique": [
    "Equipo: Máquina Smith (barra a la altura de la cadera).",
    "Inicio: Colgado bajo la barra, cuerpo en línea, talones en el suelo.",
@@ -720,6 +764,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-1-0": {
+  "movement": "remo-invertido-smith",
   "technique": [
    "Equipo: Máquina Smith (barra a la altura de la cadera).",
    "Inicio: Colgado bajo la barra, cuerpo en línea, talones en el suelo.",
@@ -736,6 +781,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-1-1": {
+  "movement": "remo-pecho-apoyado",
   "technique": [
    "Equipo: 2 mancuernas, banco inclinado.",
    "Inicio: Pecho apoyado en el banco inclinado, mancuernas colgando.",
@@ -752,6 +798,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-1-2": {
+  "movement": "remo-banda-sentado",
   "technique": [
    "Equipo: Banda anclada baja o rodeando los pies.",
    "Inicio: Sentado con piernas extendidas, banda tensa con los brazos al frente.",
@@ -768,6 +815,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-1-3": {
+  "movement": "remo-unilateral-apoyado",
   "technique": [
    "Equipo: 1 mancuerna, banco plano.",
    "Inicio: Mano y rodilla del mismo lado en el banco, espalda neutra, brazo colgando.",
@@ -785,6 +833,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-2-0": {
+  "movement": "pullover-mancuerna",
   "technique": [
    "Equipo: 1 mancuerna, banco plano.",
    "Inicio: Tumbado, mancuerna sujeta con las dos manos sobre el pecho.",
@@ -802,6 +851,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-2-1": {
+  "movement": "jalon-banda",
   "technique": [
    "Equipo: Banda con anclaje alto seguro.",
    "Inicio: De rodillas o sentado frente al anclaje, brazos arriba sujetando la banda.",
@@ -819,6 +869,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-2-2": {
+  "movement": "pullover-banda",
   "technique": [
    "Equipo: Banda anclada alta.",
    "Inicio: Frente al anclaje, brazos extendidos al frente y arriba sujetando la banda.",
@@ -835,6 +886,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-2-3": {
+  "movement": "remo-codos-cerrados",
   "technique": [
    "Equipo: 2 mancuernas, banco inclinado (pecho apoyado).",
    "Inicio: Pecho apoyado, mancuernas colgando con las palmas enfrentadas.",
@@ -851,6 +903,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-3-0": {
+  "movement": "curl-alternado",
   "technique": [
    "Equipo: 2 mancuernas.",
    "Inicio: De pie, mancuernas a los lados con las palmas al frente.",
@@ -867,6 +920,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-3-1": {
+  "movement": "curl-martillo",
   "technique": [
    "Equipo: 2 mancuernas.",
    "Inicio: De pie, mancuernas a los lados con las palmas enfrentadas.",
@@ -883,6 +937,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-3-2": {
+  "movement": "curl-sentado",
   "technique": [
    "Equipo: 2 mancuernas, banco.",
    "Inicio: Sentado, brazos extendidos a los lados.",
@@ -899,6 +954,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-3-3": {
+  "movement": "curl-banda",
   "technique": [
    "Equipo: Banda elástica pisada.",
    "Inicio: De pie pisando la banda, brazos extendidos.",
@@ -915,6 +971,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-4-0": {
+  "movement": "pajaros",
   "technique": [
    "Equipo: 2 mancuernas ligeras.",
    "Inicio: Sentado o de pie inclinado hacia delante con espalda neutra, mancuernas colgando.",
@@ -932,6 +989,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-4-1": {
+  "movement": "face-pull-banda",
   "technique": [
    "Equipo: Banda anclada a la altura de la cara.",
    "Inicio: De pie frente al anclaje, brazos extendidos al frente.",
@@ -948,6 +1006,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-4-2": {
+  "movement": "aperturas-inversas-apoyado",
   "technique": [
    "Equipo: 2 mancuernas ligeras, banco inclinado.",
    "Inicio: Pecho apoyado en el banco inclinado, brazos colgando.",
@@ -964,6 +1023,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "2-4-3": {
+  "movement": "pull-aparts-banda",
   "technique": [
    "Equipo: Banda elástica.",
    "Inicio: De pie, brazos extendidos al frente sujetando la banda.",
@@ -980,6 +1040,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-0-0": {
+  "movement": "hip-thrust-mancuerna",
   "technique": [
    "Equipo: Mancuerna, banco.",
    "Inicio: Espalda alta en el banco, mancuerna sujeta sobre la cadera.",
@@ -996,6 +1057,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-0-1": {
+  "movement": "hip-thrust-smith",
   "technique": [
    "Equipo: Máquina Smith con almohadilla, banco.",
    "Inicio: Espalda alta apoyada en el banco, barra almohadillada sobre la cadera, pies apoyados.",
@@ -1013,6 +1075,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-0-2": {
+  "movement": "puente-banda",
   "technique": [
    "Equipo: Banda elástica (sobre la cadera, sujeta con las manos o anclada).",
    "Inicio: Boca arriba, rodillas flexionadas, banda tensa sobre la cadera.",
@@ -1029,6 +1092,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-0-3": {
+  "movement": "puente-unilateral",
   "technique": [
    "Equipo: Esterilla.",
    "Inicio: Boca arriba, una rodilla flexionada con el pie apoyado y la otra pierna elevada.",
@@ -1045,6 +1109,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-1-0": {
+  "movement": "peso-muerto-rumano-mancuernas",
   "technique": [
    "Equipo: 2 mancuernas.",
    "Inicio: De pie, mancuernas delante de los muslos, rodillas ligeramente flexionadas.",
@@ -1063,6 +1128,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-1-1": {
+  "movement": "bisagra-sin-carga",
   "technique": [
    "Equipo: Palo o pica opcional.",
    "Inicio: De pie, manos en la cintura (o palo a lo largo de la espalda tocando cabeza, espalda alta y sacro).",
@@ -1079,6 +1145,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-1-2": {
+  "movement": "pull-through-banda",
   "technique": [
    "Equipo: Banda anclada baja detrás.",
    "Inicio: De espaldas al anclaje, banda entre las piernas, cadera atrás.",
@@ -1095,6 +1162,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-1-3": {
+  "movement": "curl-femoral-deslizante",
   "technique": [
    "Equipo: Deslizadores, esterilla.",
    "Inicio: Boca arriba con cadera elevada, talones sobre los deslizadores y piernas casi extendidas.",
@@ -1111,6 +1179,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-2-0": {
+  "movement": "curl-femoral-deslizante",
   "technique": [
    "Equipo: Deslizadores, esterilla.",
    "Inicio: Boca arriba con cadera elevada, talones sobre los deslizadores y piernas casi extendidas.",
@@ -1127,6 +1196,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-2-1": {
+  "movement": "curl-femoral-banda",
   "technique": [
    "Equipo: Banda anclada baja, esterilla.",
    "Inicio: Boca abajo, banda en los tobillos, piernas extendidas.",
@@ -1143,6 +1213,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-2-2": {
+  "movement": "puente-talones-elevados",
   "technique": [
    "Equipo: Banco, esterilla.",
    "Inicio: Boca arriba, talones sobre el banco, rodillas ligeramente flexionadas.",
@@ -1159,6 +1230,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-2-3": {
+  "movement": "curl-femoral-toalla",
   "technique": [
    "Equipo: Toalla sobre suelo liso.",
    "Inicio: Igual que el curl deslizante, talones sobre una toalla.",
@@ -1175,6 +1247,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-3-0": {
+  "movement": "bird-dog",
   "technique": [
    "Equipo: Esterilla.",
    "Inicio: En cuadrupedia, manos bajo hombros y rodillas bajo cadera.",
@@ -1192,6 +1265,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-3-1": {
+  "movement": "dead-bug",
   "technique": [
    "Equipo: Esterilla.",
    "Inicio: Boca arriba, brazos al techo, cadera y rodillas a 90°.",
@@ -1208,6 +1282,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-3-2": {
+  "movement": "marcha-supina",
   "technique": [
    "Equipo: Esterilla.",
    "Inicio: Boca arriba, rodillas flexionadas, pies apoyados.",
@@ -1224,6 +1299,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-3-3": {
+  "movement": "bird-dog",
   "technique": [
    "Equipo: Esterilla.",
    "Inicio: En cuadrupedia, manos bajo hombros y rodillas bajo cadera.",
@@ -1241,6 +1317,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-4-0": {
+  "movement": "plancha-lateral-rodillas",
   "technique": [
    "Equipo: Esterilla.",
    "Inicio: De lado, apoyado en el antebrazo y las rodillas flexionadas, cadera elevada en línea.",
@@ -1258,6 +1335,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-4-1": {
+  "movement": "pallof-press",
   "technique": [
    "Equipo: Banda anclada a la altura del pecho.",
    "Inicio: De pie de lado al anclaje, manos con la banda junto al pecho.",
@@ -1274,6 +1352,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-4-2": {
+  "movement": "plancha-frontal-elevada",
   "technique": [
    "Equipo: Banco (manos o antebrazos elevados).",
    "Inicio: Antebrazos o manos sobre el banco, cuerpo en línea recta, pies en el suelo.",
@@ -1290,6 +1369,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "3-4-3": {
+  "movement": "dead-bug",
   "technique": [
    "Equipo: Esterilla.",
    "Inicio: Boca arriba, brazos al techo, cadera y rodillas a 90°.",
@@ -1306,6 +1386,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-0-0": {
+  "movement": "step-up-mancuernas",
   "technique": [
    "Equipo: Banco o escalón bajo, 2 mancuernas.",
    "Inicio: Igual que el step-up bajo, con una mancuerna en cada mano a los lados.",
@@ -1323,6 +1404,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-0-1": {
+  "movement": "sentadilla-goblet-banco",
   "technique": [
    "Equipo: Mancuerna, banco plano.",
    "Inicio: De pie delante del banco, pies al ancho de hombros, mancuerna vertical sujeta junto al pecho.",
@@ -1341,6 +1423,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-0-2": {
+  "movement": "zancada-inversa-asistida",
   "technique": [
    "Equipo: Apoyo para una mano (banco alto, pared o Smith).",
    "Inicio: De pie junto al apoyo, una mano en él.",
@@ -1358,6 +1441,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-0-3": {
+  "movement": "sentadilla-smith-banco",
   "technique": [
    "Equipo: Máquina Smith, banco plano.",
    "Inicio: De pie bajo la barra apoyada en la parte alta de la espalda, pies ligeramente adelantados, banco detrás.",
@@ -1376,6 +1460,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-1-0": {
+  "movement": "press-pecho-mancuernas",
   "technique": [
    "Equipo: 2 mancuernas, banco plano.",
    "Inicio: Tumbado, mancuernas a la altura del pecho, codos a unos 45–60°.",
@@ -1392,6 +1477,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-1-1": {
+  "movement": "press-pecho-smith",
   "technique": [
    "Equipo: Máquina Smith, banco plano.",
    "Inicio: Tumbado en el banco, barra sobre la parte media del pecho con los codos flexionados.",
@@ -1409,6 +1495,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-1-2": {
+  "movement": "flexiones-inclinadas",
   "technique": [
    "Equipo: Banco o barra Smith alta.",
    "Inicio: Manos sobre el banco, cuerpo en línea recta.",
@@ -1425,6 +1512,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-1-3": {
+  "movement": "press-suelo-mancuernas",
   "technique": [
    "Equipo: 2 mancuernas, esterilla.",
    "Inicio: Tumbado en el suelo, rodillas flexionadas, codos apoyados en el suelo.",
@@ -1441,6 +1529,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-2-0": {
+  "movement": "remo-pecho-apoyado",
   "technique": [
    "Equipo: 2 mancuernas, banco inclinado.",
    "Inicio: Pecho apoyado en el banco inclinado, mancuernas colgando.",
@@ -1457,6 +1546,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-2-1": {
+  "movement": "remo-unilateral-apoyado",
   "technique": [
    "Equipo: 1 mancuerna, banco plano.",
    "Inicio: Mano y rodilla del mismo lado en el banco, espalda neutra, brazo colgando.",
@@ -1474,6 +1564,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-2-2": {
+  "movement": "remo-banda-sentado",
   "technique": [
    "Equipo: Banda anclada baja o rodeando los pies.",
    "Inicio: Sentado con piernas extendidas, banda tensa con los brazos al frente.",
@@ -1490,6 +1581,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-2-3": {
+  "movement": "remo-invertido-smith",
   "technique": [
    "Equipo: Máquina Smith (barra a la altura de la cadera).",
    "Inicio: Colgado bajo la barra, cuerpo en línea, talones en el suelo.",
@@ -1506,6 +1598,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-3-0": {
+  "movement": "press-hombros-sentado",
   "technique": [
    "Equipo: 2 mancuernas, banco con respaldo.",
    "Inicio: Sentado con respaldo, mancuernas a la altura de los hombros, palmas al frente.",
@@ -1523,6 +1616,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-3-1": {
+  "movement": "press-hombros-neutro",
   "technique": [
    "Equipo: 2 mancuernas, banco con respaldo.",
    "Inicio: Sentado, mancuernas a la altura de los hombros con las palmas enfrentadas.",
@@ -1539,6 +1633,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-3-2": {
+  "movement": "elevacion-lateral",
   "technique": [
    "Equipo: 2 mancuernas ligeras.",
    "Inicio: De pie, mancuernas a los lados, codos ligeramente flexionados.",
@@ -1556,6 +1651,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-3-3": {
+  "movement": "press-hombros-unilateral",
   "technique": [
    "Equipo: 1 mancuerna, banco con respaldo.",
    "Inicio: Sentado, una mancuerna a la altura del hombro.",
@@ -1572,6 +1668,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-4-0": {
+  "movement": "pallof-press",
   "technique": [
    "Equipo: Banda anclada a la altura del pecho.",
    "Inicio: De pie de lado al anclaje, manos con la banda junto al pecho.",
@@ -1588,6 +1685,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-4-1": {
+  "movement": "dead-bug",
   "technique": [
    "Equipo: Esterilla.",
    "Inicio: Boca arriba, brazos al techo, cadera y rodillas a 90°.",
@@ -1604,6 +1702,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-4-2": {
+  "movement": "bird-dog",
   "technique": [
    "Equipo: Esterilla.",
    "Inicio: En cuadrupedia, manos bajo hombros y rodillas bajo cadera.",
@@ -1621,6 +1720,7 @@ self.FIT_LIBRARY = Object.freeze({
   ]
  },
  "4-4-3": {
+  "movement": "plancha-lateral",
   "technique": [
    "Equipo: Esterilla.",
    "Inicio: De lado, apoyado en el antebrazo y los pies, cuerpo en línea.",
